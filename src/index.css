@@ -1,0 +1,82 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-serif: 'Instrument Serif', ui-serif, Georgia, serif;
+  --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-white: #ffffff;
+  --color-black: #000000;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #fff;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: #000;
+  background: #fff;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: #000;
+  color: #fff;
+}
+
+.story-box {
+  background: #fff;
+}
+
+@media (hover: hover) {
+  .story-box:hover,
+  .story-box:focus-visible {
+    background: #000;
+  }
+}
+
+.story-box[data-filled='true'] {
+  background: #000;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-in,
+  .chrome-in {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .story-in {
+    animation: story-in 280ms ease-out both;
+  }
+
+  .chrome-in {
+    animation: chrome-in 400ms ease-out both;
+  }
+}
+
+@keyframes story-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes chrome-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}

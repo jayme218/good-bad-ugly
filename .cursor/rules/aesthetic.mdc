@@ -1,0 +1,23 @@
+---
+description: Locked reading-surface aesthetic for The Good, The Bad, and The Ugly
+alwaysApply: true
+---
+
+# Reading surface is locked
+
+The current black-and-white three-box UI is the product. Do not restyle it.
+
+- White field, black hairline boxes, no color, no nav, no extra chrome
+- Landing is empty boxes; content appears only after click
+- After all three are open: title, edition date, and “You're all caught up…”
+- No feeds, archives, related stories, share strips, or buttons on the reading page
+
+New work belongs behind this surface (dated editions, persistence, publish) or is out of scope.
+
+```tsx
+// BAD — preview on a closed box
+<button>The Good</button>
+
+// GOOD — empty box, label only for assistive tech
+<button aria-label="Open The Good" />
+```
