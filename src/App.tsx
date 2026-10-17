@@ -1,11 +1,16 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
-import { NewsCard, StoryBody } from './components/NewsCard'
+import { NewsCard } from './components/NewsCard'
+import { StoryReader } from './components/StoryReader'
+import { Unavailable } from './components/Unavailable'
 import today from './data/today.json'
-import type { NewsItem, NewsType } from './types'
+import { parseEdition } from './edition'
+import { loadOpened, saveOpened } from './openedState'
+import { editorialToday } from './timezone'
+import type { NewsType } from './types'
 
-const edition = today as NewsItem[]
+const edition = parseEdition(today)
 const mobileQuery = '(max-width: 767px)'
 
 function useIsMobile() {
@@ -25,42 +30,81 @@ function useIsMobile() {
   return isMobile
 }
 
+function useChicagoToday() {
+  const [today, setToday] = useState(() => editorialToday())
+
+  useEffect(() => {
+    function sync() {
+      const next = editorialToday()
+      setToday((current) => (current.iso === next.iso ? current : next))
+    }
+
+    document.addEventListener('visibilitychange', sync)
+    window.addEventListener('focus', sync)
+    return () => {
+      document.removeEventListener('visibilitychange', sync)
+      window.removeEventListener('focus', sync)
+    }
+  }, [])
+
+  return today
+}
+
 export default function App() {
   const isMobile = useIsMobile()
-  const [opened, setOpened] = useState<Record<NewsType, boolean>>({
-    good: false,
-    bad: false,
-    ugly: false,
-  })
+  const chicago = useChicagoToday()
+  const chicagoIso = useRef(chicago.iso)
+  const [opened, setOpened] = useState(() => loadOpened(editorialToday().iso))
   const [reading, setReading] = useState<NewsType | null>(null)
+
+  useEffect(() => {
+    if (chicagoIso.current === chicago.iso) return
+    chicagoIso.current = chicago.iso
+    setOpened(loadOpened(chicago.iso))
+    setReading(null)
+  }, [chicago.iso])
+
+  useEffect(() => {
+    const media = window.matchMedia(mobileQuery)
+    function closeOnDesktop() {
+      if (!media.matches) setReading(null)
+    }
+    media.addEventListener('change', closeOnDesktop)
+    return () => media.removeEventListener('change', closeOnDesktop)
+  }, [])
+
+  if (!edition) {
+    return <Unavailable />
+  }
+
   const allOpened = opened.good && opened.bad && opened.ugly
-  const readingItem = edition.find((item) => item.type === reading) ?? null
+  const readingItem = edition.items.find((item) => item.type === reading) ?? null
 
   function open(type: NewsType) {
-    setOpened((current) => ({ ...current, [type]: true }))
+    setOpened((current) => {
+      const next = { ...current, [type]: true }
+      saveOpened(chicago.iso, next)
+      return next
+    })
     if (window.matchMedia(mobileQuery).matches) {
       setReading(type)
     }
   }
 
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === 'Escape') setReading(null)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [])
-
   return (
-    <div className="flex h-dvh w-full flex-col overflow-hidden bg-white text-black">
-      <Header visible={allOpened && reading === null} />
+    <div className="flex h-dvh w-full flex-col overflow-y-auto bg-white text-black">
+      <Header
+        visible={reading === null}
+        iso={chicago.iso}
+        label={chicago.label}
+      />
 
       <main
         aria-label="Today's three stories"
-        className="mx-auto flex min-h-0 w-full max-w-[72rem] flex-1 items-stretch px-[clamp(1rem,4vw,2.5rem)] py-2"
+        className="mx-auto flex min-h-64 w-full max-w-[72rem] flex-1 shrink-0 items-stretch px-[clamp(1rem,4vw,2.5rem)] py-2"
       >
         <div className="grid h-full min-h-0 w-full grid-cols-3 gap-2 md:gap-5">
-          {edition.map((item) => (
+          {edition.items.map((item) => (
             <NewsCard
               key={item.type}
               item={item}
@@ -74,20 +118,8 @@ export default function App() {
 
       <Footer visible={allOpened && reading === null} />
 
-      {readingItem ? (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-label="Story"
-          className="fixed inset-0 z-20 flex bg-white p-[clamp(1rem,4vw,1.75rem)]"
-        >
-          <article
-            className="h-full w-full cursor-pointer overflow-hidden border border-black"
-            onClick={() => setReading(null)}
-          >
-            <StoryBody item={readingItem} />
-          </article>
-        </div>
+      {isMobile && readingItem ? (
+        <StoryReader item={readingItem} onClose={() => setReading(null)} />
       ) : null}
     </div>
   )

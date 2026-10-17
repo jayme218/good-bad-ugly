@@ -1,32 +1,36 @@
-[
-  {
-    "type": "good",
-    "headline": "Reefs rebound after heatwave",
-    "summaries": [
-      "Surveys find 40% more living coral than last year.",
-      "A Florida spawning method now runs in 11 countries.",
-      "Snapper have returned to reefs barren since 2016."
-    ],
-    "editorNote": "One cooler year does not erase a hotter ocean. It does show restoration works when it is funded like infrastructure, not charity."
-  },
-  {
-    "type": "bad",
-    "headline": "Aquifers hit a historic low",
-    "summaries": [
-      "The Ogallala Aquifer fell another four feet this year.",
-      "Twelve Plains counties have moved to emergency rationing.",
-      "Grain futures jumped 9% as irrigators idle fields."
-    ],
-    "editorNote": "This is not a drought story. It is a drawdown story: we have been mining water that does not come back."
-  },
-  {
-    "type": "ugly",
-    "headline": "Water summit flies private",
-    "summaries": [
-      "Delegates arrived at the security forum on 47 private jets.",
-      "The host city banned lawn watering while banquet fountains ran.",
-      "The closing pledge skipped any cap on groundwater pumping."
-    ],
-    "editorNote": "The people who named the crisis reserved the right to outrun it. The fountains were decorative. The aquifers are not."
-  }
-]
+{
+  "date": "2026-09-08",
+  "timezone": "America/Chicago",
+  "items": [
+    {
+      "type": "good",
+      "headline": "Reefs rebound after heatwave",
+      "summaries": [
+        "Surveys find 40% more living coral than last year.",
+        "A Florida spawning method now runs in 11 countries.",
+        "Snapper have returned to reefs barren since 2016."
+      ],
+      "editorNote": "One cooler year does not erase a hotter ocean. It does show restoration works when it is funded like infrastructure, not charity."
+    },
+    {
+      "type": "bad",
+      "headline": "Aquifers hit a historic low",
+      "summaries": [
+        "The Ogallala Aquifer fell another four feet this year.",
+        "Twelve Plains counties have moved to emergency rationing.",
+        "Grain futures jumped 9% as irrigators idle fields."
+      ],
+      "editorNote": "This is not a drought story. It is a drawdown story: we have been mining water that does not come back."
+    },
+    {
+      "type": "ugly",
+      "headline": "Water summit flies private",
+      "summaries": [
+        "Delegates arrived at the security forum on 47 private jets.",
+        "The host city banned lawn watering while banquet fountains ran.",
+        "The closing pledge skipped any cap on groundwater pumping."
+      ],
+      "editorNote": "The people who named the crisis reserved the right to outrun it. The fountains were decorative. The aquifers are not."
+    }
+  ]
+}
