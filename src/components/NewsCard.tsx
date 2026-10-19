@@ -49,7 +49,7 @@ export function NewsCard({ item, open, filled, onOpen }: NewsCardProps) {
       <button
         id={`story-trigger-${item.type}`}
         type="button"
-        aria-label={open ? `Read ${label}` : `Open ${label}`}
+        aria-label={open ? `${label}, opened. Read again` : `Open ${label}`}
         aria-expanded={open && !filled}
         onClick={onOpen}
         className={`${boxClass} story-box items-center justify-center appearance-none px-2 py-4 cursor-pointer`}
@@ -57,6 +57,12 @@ export function NewsCard({ item, open, filled, onOpen }: NewsCardProps) {
       >
         <span className="font-serif text-[clamp(1.1rem,2.5vw,2rem)] leading-tight text-center">
           {label}
+        </span>
+        <span
+          aria-hidden="true"
+          className={`mt-2 font-sans text-xs leading-normal ${open ? '' : 'invisible'}`}
+        >
+          Opened
         </span>
       </button>
     )
