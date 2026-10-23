@@ -78,7 +78,9 @@ export default function App() {
   }
 
   const allOpened = opened.good && opened.bad && opened.ugly
-  const readingItem = edition.items.find((item) => item.type === reading) ?? null
+  const readingIndex = edition.items.findIndex((item) => item.type === reading)
+  const readingItem = edition.items[readingIndex] ?? null
+  const nextItem = readingIndex >= 0 ? edition.items[readingIndex + 1] : undefined
 
   function open(type: NewsType) {
     setOpened((current) => {
@@ -119,7 +121,12 @@ export default function App() {
       <Footer visible={allOpened && reading === null} />
 
       {isMobile && readingItem ? (
-        <StoryReader item={readingItem} onClose={() => setReading(null)} />
+        <StoryReader
+          item={readingItem}
+          nextType={nextItem?.type}
+          onNext={nextItem ? () => open(nextItem.type) : undefined}
+          onClose={() => setReading(null)}
+        />
       ) : null}
     </div>
   )

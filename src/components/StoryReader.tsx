@@ -1,9 +1,24 @@
 import { useEffect, useRef } from 'react'
 import { StoryBody } from './NewsCard'
-import type { NewsItem } from '../types'
+import type { NewsItem, NewsType } from '../types'
 
-export function StoryReader({ item, onClose }: { item: NewsItem; onClose: () => void }) {
+const labels: Record<NewsType, string> = {
+  good: 'The Good',
+  bad: 'The Bad',
+  ugly: 'The Ugly',
+}
+
+type StoryReaderProps = {
+  item: NewsItem
+  nextType?: NewsType
+  onNext?: () => void
+  onClose: () => void
+}
+
+export function StoryReader({ item, nextType, onNext, onClose }: StoryReaderProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
+  const articleRef = useRef<HTMLElement>(null)
+  const latestType = useRef(item.type)
 
   useEffect(() => {
     const dialog = dialogRef.current
@@ -12,8 +27,16 @@ export function StoryReader({ item, onClose }: { item: NewsItem; onClose: () => 
     dialog.showModal()
     return () => {
       dialog.close()
-      document.getElementById(`story-trigger-${item.type}`)?.focus({ preventScroll: true })
+      document.getElementById(`story-trigger-${latestType.current}`)?.focus({ preventScroll: true })
     }
+  }, [])
+
+  useEffect(() => {
+    latestType.current = item.type
+    const article = articleRef.current
+    if (!article) return
+    article.scrollTop = 0
+    article.focus({ preventScroll: true })
   }, [item.type])
 
   return (
@@ -36,11 +59,25 @@ export function StoryReader({ item, onClose }: { item: NewsItem; onClose: () => 
           Back to stories
         </button>
         <article
+          ref={articleRef}
           tabIndex={0}
           aria-label={item.headline}
           className="min-h-0 flex-1 overflow-y-auto overscroll-contain border border-black focus-visible:outline-2 focus-visible:outline-offset-2"
         >
-          <StoryBody item={item} />
+          <div className="flex min-h-full flex-col">
+            <div className="flex-1">
+              <StoryBody item={item} fillHeight={false} />
+            </div>
+            <div className="mx-[clamp(0.9rem,2vw,1.5rem)] shrink-0 border-t border-black">
+              <button
+                type="button"
+                onClick={nextType && onNext ? onNext : onClose}
+                className="min-h-11 w-full cursor-pointer py-3 text-left font-sans text-sm focus-visible:outline-2 focus-visible:outline-offset-[-2px]"
+              >
+                {nextType && onNext ? `Next: ${labels[nextType]}` : 'Back to stories'}
+              </button>
+            </div>
+          </div>
         </article>
       </div>
     </dialog>

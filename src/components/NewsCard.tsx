@@ -6,11 +6,11 @@ const labels: Record<NewsType, string> = {
   ugly: 'The Ugly',
 }
 
-export function StoryBody({ item }: { item: NewsItem }) {
+export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHeight?: boolean }) {
   const label = labels[item.type]
 
   return (
-    <div className="story-in flex min-h-full min-w-0 flex-col break-words px-[clamp(0.9rem,2vw,1.5rem)] py-[clamp(0.9rem,2.2vh,1.5rem)]">
+    <div className={`story-in flex ${fillHeight ? 'min-h-full' : ''} min-w-0 flex-col break-words px-[clamp(0.9rem,2vw,1.5rem)] py-[clamp(0.9rem,2.2vh,1.5rem)]`}>
       <p className="mb-[clamp(0.55rem,1.4vh,0.9rem)] font-serif text-[clamp(1rem,1.8vh,1.2rem)] italic leading-none">
         {label}
       </p>
