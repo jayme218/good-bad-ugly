@@ -17,6 +17,18 @@ function isItem(value: unknown): value is NewsItem {
     return false
   }
   if (typeof item.editorNote !== 'string' || item.editorNote.length === 0) return false
+  if ('source' in item) {
+    if (!item.source || typeof item.source !== 'object') return false
+    const source = item.source as Record<string, unknown>
+    if (typeof source.name !== 'string' || !source.name.trim()) return false
+    if (typeof source.url !== 'string') return false
+    try {
+      const url = new URL(source.url)
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') return false
+    } catch {
+      return false
+    }
+  }
   return true
 }
 
@@ -25,6 +37,10 @@ export function parseEdition(raw: unknown): Edition | null {
   const data = raw as Record<string, unknown>
   if (data.timezone !== EDITORIAL_TIMEZONE) return null
   if (typeof data.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(data.date)) {
+    return null
+  }
+  const date = new Date(`${data.date}T00:00:00Z`)
+  if (data.date.startsWith('0000-') || Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== data.date) {
     return null
   }
   if (!Array.isArray(data.items) || data.items.length !== 3) return null

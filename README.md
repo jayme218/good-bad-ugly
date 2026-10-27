@@ -2,6 +2,8 @@
 
 Three pieces of news a day. Then close the tab.
 
+See [Publishing an edition](docs/PUBLISHING.md) for the daily content and release checklist.
+
 ## Develop
 
 ```bash

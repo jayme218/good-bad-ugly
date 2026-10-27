@@ -2,14 +2,16 @@ export function Header({
   visible,
   iso,
   label,
+  stale,
 }: {
   visible: boolean
   iso: string
   label: string
+  stale: boolean
 }) {
   return (
     <header
-      className={`flex min-h-[4.5rem] shrink-0 items-center justify-between gap-6 px-[clamp(1rem,3vw,2.5rem)] py-3 ${visible ? 'chrome-in' : 'invisible'}`}
+      className={`flex min-h-[4.5rem] shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 px-[clamp(1rem,3vw,2.5rem)] py-3 ${visible ? 'chrome-in' : 'invisible'}`}
       aria-hidden={!visible}
     >
       <div className="min-w-0">
@@ -22,10 +24,15 @@ export function Header({
       </div>
       <time
         dateTime={iso}
-        className="hidden shrink-0 font-sans text-[clamp(0.7rem,1.2vw,0.85rem)] sm:block"
+        className="font-sans text-[clamp(0.7rem,1.2vw,0.85rem)]"
       >
         {label}
       </time>
+      {stale ? (
+        <p role="status" className="w-full border-t border-black pt-3 font-sans text-sm leading-relaxed">
+          Today's edition isn't available yet. Showing the {label} edition.
+        </p>
+      ) : null}
     </header>
   )
 }

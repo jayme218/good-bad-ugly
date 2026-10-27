@@ -1,5 +1,18 @@
 # PRD — The Good, The Bad, and The Ugly
 
+## Approved updates (October 2026)
+
+The following user-approved changes supersede conflicting UI, state, and acceptance rules in the original brief below:
+
+- Show the product explanation and category names initially; retain concealed headlines until opened.
+- Mobile reading uses explicit back/next controls, scrollable content, and a small Opened indicator on previously opened cards.
+- Display the actual edition date on desktop and mobile. Key opened state by that date; a calendar rollover alone does not reset progress for unchanged content.
+- If the bundled edition is older than today in Chicago, keep it readable with an explicit unavailable-today notice. Future-dated and invalid editions are unavailable.
+- Articles support a named HTTP(S) source link. Missing sources are stated explicitly, and editorial interpretation is labeled Editor's note.
+- The end message describes the three stories offered, not proof of having read them or comprehensive news coverage.
+
+Daily publication remains a manual, verified build/deploy process; see [PUBLISHING.md](PUBLISHING.md). No accounts, feeds, archives, or notification system are added.
+
 Feed this document to a coding agent as the source of truth. Do not invent screens, colors, navigation, or extra copy. The reading surface is locked.
 
 ---

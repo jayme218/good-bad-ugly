@@ -25,9 +25,23 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
           </li>
         ))}
       </ul>
-      <blockquote className="mt-auto border-l border-black pt-[clamp(0.85rem,2vh,1.2rem)] pl-3 font-sans text-[clamp(0.85rem,1.55vh,0.95rem)] leading-[1.5]">
-        {item.editorNote}
-      </blockquote>
+      <p className="mb-5 font-sans text-xs leading-relaxed">
+        {item.source ? (
+          <a
+            href={item.source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-4 focus-visible:outline-2 focus-visible:outline-offset-4"
+          >
+            Source: {item.source.name.trim()}
+            <span className="sr-only"> (opens in a new tab)</span>
+          </a>
+        ) : 'Source not provided'}
+      </p>
+      <section aria-label="Editor's note" className="mt-auto border-l border-black pt-[clamp(0.85rem,2vh,1.2rem)] pl-3 font-sans text-[clamp(0.85rem,1.55vh,0.95rem)] leading-[1.5]">
+        <h3 className="mb-2 text-xs">Editor's note</h3>
+        <p>{item.editorNote}</p>
+      </section>
     </div>
   )
 }

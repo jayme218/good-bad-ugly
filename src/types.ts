@@ -5,6 +5,7 @@ export interface NewsItem {
   headline: string
   summaries: string[]
   editorNote: string
+  source?: { name: string; url: string }
 }
 
 export interface Edition {

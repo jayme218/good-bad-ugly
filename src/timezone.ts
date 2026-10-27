@@ -1,5 +1,15 @@
 export const EDITORIAL_TIMEZONE = 'America/Chicago'
 
+export function formatEditionDate(iso: string) {
+  return new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC',
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(`${iso}T12:00:00Z`))
+}
+
 export function editorialToday(now = new Date()) {
   const iso = new Intl.DateTimeFormat('en-CA', {
     timeZone: EDITORIAL_TIMEZONE,
