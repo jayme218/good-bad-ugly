@@ -11,7 +11,7 @@ export function Header({
 }) {
   return (
     <header
-      className={`flex min-h-[4.5rem] shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 px-[clamp(1rem,3vw,2.5rem)] py-3 ${visible ? 'chrome-in' : 'invisible'}`}
+      className={`mx-auto flex min-h-[4.5rem] w-full max-w-[72rem] shrink-0 flex-wrap items-center justify-between gap-x-6 gap-y-3 px-[clamp(1rem,4vw,2.5rem)] py-3 ${visible ? 'chrome-in' : 'invisible'}`}
       aria-hidden={!visible}
     >
       <div className="min-w-0">

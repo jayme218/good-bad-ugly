@@ -25,7 +25,7 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
           </li>
         ))}
       </ul>
-      <p className="mb-5 font-sans text-xs leading-relaxed">
+      <p className="font-sans text-xs leading-relaxed">
         {item.source ? (
           <a
             href={item.source.url}
@@ -38,7 +38,7 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
           </a>
         ) : 'Source not provided'}
       </p>
-      <section aria-label="Editor's note" className="mt-auto border-l border-black pt-[clamp(0.85rem,2vh,1.2rem)] pl-3 font-sans text-[clamp(0.85rem,1.55vh,0.95rem)] leading-[1.5]">
+      <section aria-label="Editor's note" className="mt-6 border-l border-black pl-3 font-sans text-[clamp(0.85rem,1.55vh,0.95rem)] leading-[1.5]">
         <h3 className="mb-2 text-xs">Editor's note</h3>
         <p>{item.editorNote}</p>
       </section>
