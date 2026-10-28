@@ -44,6 +44,15 @@ describe('publication display', () => {
     expect(html).toContain('The Good, opened. Read again')
     expect(html).toContain(`dateTime="${edition.date}"`)
     for (const item of edition.items) expect(html).not.toContain(item.headline)
+    expect(html.match(/aria-haspopup="dialog"/g)).toHaveLength(3)
+    expect(html).not.toContain('aria-expanded')
+  })
+
+  it('does not announce desktop cards as modal dialogs or collapsed disclosures', () => {
+    const { html } = renderEdition(1)
+    expect(html).not.toContain('aria-haspopup')
+    expect(html).not.toContain('aria-expanded')
+    expect(html).toContain('<article')
   })
 
   it('does not show a future edition as published', () => {

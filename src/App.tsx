@@ -109,6 +109,7 @@ export default function App() {
               item={item}
               open={opened[item.type]}
               filled={isMobile && opened[item.type]}
+              isMobile={isMobile}
               onOpen={() => open(item.type)}
             />
           ))}

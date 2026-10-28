@@ -1,3 +1,4 @@
+import { useRef } from 'react'
 import type { NewsItem, NewsType } from '../types'
 
 const labels: Record<NewsType, string> = {
@@ -50,10 +51,12 @@ type NewsCardProps = {
   item: NewsItem
   open: boolean
   filled: boolean
+  isMobile: boolean
   onOpen: () => void
 }
 
-export function NewsCard({ item, open, filled, onOpen }: NewsCardProps) {
+export function NewsCard({ item, open, filled, isMobile, onOpen }: NewsCardProps) {
+  const focusAfterOpen = useRef(false)
   const label = labels[item.type]
   const boxClass =
     'flex h-full min-h-0 min-w-0 w-full flex-col border border-black'
@@ -64,8 +67,11 @@ export function NewsCard({ item, open, filled, onOpen }: NewsCardProps) {
         id={`story-trigger-${item.type}`}
         type="button"
         aria-label={open ? `${label}, opened. Read again` : `Open ${label}`}
-        aria-expanded={open && !filled}
-        onClick={onOpen}
+        aria-haspopup={isMobile ? 'dialog' : undefined}
+        onClick={(event) => {
+          focusAfterOpen.current = !isMobile && document.activeElement === event.currentTarget
+          onOpen()
+        }}
         className={`${boxClass} story-box items-center justify-center appearance-none px-2 py-4 cursor-pointer`}
         data-filled={filled ? 'true' : 'false'}
       >
@@ -83,7 +89,17 @@ export function NewsCard({ item, open, filled, onOpen }: NewsCardProps) {
   }
 
   return (
-    <article tabIndex={0} aria-label={label} className={`${boxClass} story-article overflow-y-auto bg-white`}>
+    <article
+      ref={(article) => {
+        if (article && focusAfterOpen.current) {
+          focusAfterOpen.current = false
+          article.focus({ preventScroll: true })
+        }
+      }}
+      tabIndex={0}
+      aria-label={label}
+      className={`${boxClass} story-article overflow-y-auto bg-white`}
+    >
       <StoryBody item={item} />
     </article>
   )
