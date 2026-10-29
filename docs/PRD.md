@@ -10,6 +10,7 @@ The following user-approved changes supersede conflicting UI, state, and accepta
 - The single-story reader remembers each story's scroll position for the edition in the current tab, including refresh. Unvisited stories start at the top; a new edition has separate positions. If session storage is blocked, reopening still restores positions while the app remains mounted.
 - Secondary labels use a 13px floor, editorial notes a 14px floor, and summary text at least 16px. Narrow reading frames use reduced horizontal padding, and the single-story reader is capped at 44rem.
 - Display the actual edition date on desktop and mobile. Key opened state by that date; a calendar rollover alone does not reset progress for unchanged content.
+- Check the published static `edition.json` on load and visible tab return. Offer newer validated editions with an explicit “Read new edition” action on the overview; never replace stories during reading. Switching initializes the opened and scroll state for the selected edition date.
 - If the bundled edition is older than today in Chicago, keep it readable with an explicit unavailable-today notice. Future-dated and invalid editions are unavailable.
 - Articles support a named HTTP(S) source link. Missing sources are stated explicitly, and editorial interpretation is labeled Editor's note.
 - The end message describes the three stories offered, not proof of having read them or comprehensive news coverage.

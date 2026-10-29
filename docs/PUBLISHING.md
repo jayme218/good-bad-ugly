@@ -1,6 +1,8 @@
 # Publishing an edition
 
-The app bundles `src/data/today.json` at build time. Changing the calendar date does not fetch or create new stories. Publish a new build for each edition.
+The app bundles `src/data/today.json` at build time and emits the same content as `edition.json`. Publish a new build for each edition; changing the calendar date does not create new stories. There is only one content file to maintain.
+
+On initial load and when readers return to the tab, the app checks `edition.json` for a valid, newer, already-published edition. It keeps the current stories until the reader selects “Read new edition.” The notice appears on the overview, leaving an open mobile/tablet story uninterrupted. Offline, invalid, same-date, older, or future-dated responses do not replace the active edition.
 
 ## Prepare
 
@@ -21,7 +23,7 @@ npm run lint
 npm run build
 ```
 
-Preview the three stories on desktop and mobile. Check dates, source destinations, editorial labels, next-story navigation, and the end message. Then commit the content change and push to the configured deployment branch. Confirm the production deployment actually shows the new edition; a successful push alone is not deployment verification.
+Preview the three stories on desktop and mobile. Check dates, source destinations, editorial labels, next-story navigation, and the end message. Then commit the content change and push to the configured deployment branch. Confirm the production deployment actually shows the new edition and its `edition.json` matches; a successful push alone is not deployment verification. Also return to a tab running the previous edition and confirm that the update notice offers the new edition without changing its current reading content.
 
 Set a sustainable publication time before promising one to readers. No publication schedule or automatic daily publishing is configured by this change.
 

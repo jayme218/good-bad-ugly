@@ -1,4 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { EditionUpdateNotice } from './components/EditionUpdateNotice'
+import { createEditionChecker } from './editionUpdates'
+import type { Edition } from './types'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
 import { NewsCard } from './components/NewsCard'
@@ -11,7 +14,7 @@ import { editorialToday, formatEditionDate } from './timezone'
 import { createReadingPositions } from './readingPosition'
 import type { NewsType } from './types'
 
-const edition = parseEdition(today)
+const bundledEdition = parseEdition(today)
 const mobileQuery = '(max-width: 1023px)'
 
 function useIsMobile() {
@@ -54,6 +57,57 @@ function useChicagoToday() {
 }
 
 export default function App() {
+  const [edition, setEdition] = useState(bundledEdition)
+  const [pendingEdition, setPendingEdition] = useState<Edition | null>(null)
+  const editionDate = edition?.date ?? null
+  const focusNewEdition = useRef(false)
+
+  useEffect(() => {
+    if (!focusNewEdition.current) return
+    focusNewEdition.current = false
+    const firstStory = document.getElementById('story-trigger-good') ?? document.querySelector<HTMLElement>('.story-article')
+    firstStory?.focus({ preventScroll: true })
+  }, [editionDate])
+
+  useEffect(() => {
+    const checker = createEditionChecker(`${import.meta.env.BASE_URL}edition.json`, editionDate, (candidate) => {
+      setPendingEdition((current) => !current || candidate.date > current.date ? candidate : current)
+    })
+    function checkWhenVisible() {
+      if (document.visibilityState !== 'hidden') void checker.check()
+    }
+    checkWhenVisible()
+    window.addEventListener('focus', checkWhenVisible)
+    document.addEventListener('visibilitychange', checkWhenVisible)
+    return () => {
+      checker.dispose()
+      window.removeEventListener('focus', checkWhenVisible)
+      document.removeEventListener('visibilitychange', checkWhenVisible)
+    }
+  }, [editionDate])
+
+  function readNewEdition() {
+    if (!pendingEdition || pendingEdition.date > editorialToday().iso) return
+    focusNewEdition.current = true
+    setEdition(pendingEdition)
+    setPendingEdition(null)
+  }
+
+  return (
+    <EditionView
+      key={editionDate ?? 'unavailable'}
+      edition={edition}
+      pendingEdition={pendingEdition}
+      onReadNewEdition={readNewEdition}
+    />
+  )
+}
+
+function EditionView({ edition, pendingEdition, onReadNewEdition }: {
+  edition: Edition | null
+  pendingEdition: Edition | null
+  onReadNewEdition: () => void
+}) {
   const isMobile = useIsMobile()
   const chicago = useChicagoToday()
   const [opened, setOpened] = useState(() => edition ? loadOpened(edition.date) : emptyOpened())
@@ -70,7 +124,12 @@ export default function App() {
   }, [])
 
   if (!edition || edition.date > chicago.iso) {
-    return <Unavailable />
+    return (
+      <div className="flex h-dvh flex-col overflow-y-auto bg-white text-black">
+        {pendingEdition ? <EditionUpdateNotice edition={pendingEdition} onRead={onReadNewEdition} /> : null}
+        <Unavailable />
+      </div>
+    )
   }
 
   const allOpened = opened.good && opened.bad && opened.ugly
@@ -99,6 +158,10 @@ export default function App() {
         label={formatEditionDate(editionDate)}
         stale={stale}
       />
+
+      {reading === null && pendingEdition ? (
+        <EditionUpdateNotice edition={pendingEdition} onRead={onReadNewEdition} />
+      ) : null}
 
       <main
         aria-label={stale ? "This edition's three stories" : "Today's three stories"}
