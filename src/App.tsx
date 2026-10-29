@@ -11,7 +11,7 @@ import { editorialToday, formatEditionDate } from './timezone'
 import type { NewsType } from './types'
 
 const edition = parseEdition(today)
-const mobileQuery = '(max-width: 767px)'
+const mobileQuery = '(max-width: 1023px)'
 
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(() =>

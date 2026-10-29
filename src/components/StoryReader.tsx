@@ -47,9 +47,9 @@ export function StoryReader({ item, nextType, onNext, onClose }: StoryReaderProp
         event.preventDefault()
         onClose()
       }}
-      className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-white p-[clamp(1rem,4vw,1.75rem)] text-black backdrop:bg-white"
+      className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-white p-[clamp(0.75rem,3vw,1.75rem)] text-black backdrop:bg-white"
     >
-      <div className="flex h-full min-h-0 flex-col gap-3">
+      <div className="mx-auto flex h-full min-h-0 w-full max-w-[44rem] flex-col gap-3">
         <button
           type="button"
           autoFocus
@@ -68,7 +68,7 @@ export function StoryReader({ item, nextType, onNext, onClose }: StoryReaderProp
             <div className="flex-1">
               <StoryBody item={item} fillHeight={false} />
             </div>
-            <div className="mx-[clamp(0.9rem,2vw,1.5rem)] shrink-0 border-t border-black">
+            <div className="mx-[clamp(0.75rem,2vw,1.5rem)] shrink-0 border-t border-black">
               <button
                 type="button"
                 onClick={nextType && onNext ? onNext : onClose}

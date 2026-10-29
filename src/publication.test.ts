@@ -15,12 +15,18 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
-function renderEdition(daysAfter: number, mobile = false) {
+function renderEdition(daysAfter: number, viewportWidth = 1280) {
   const now = new Date(`${edition.date}T18:00:00Z`)
   now.setUTCDate(now.getUTCDate() + daysAfter)
   vi.useFakeTimers({ toFake: ['Date'] })
   vi.setSystemTime(now)
-  vi.stubGlobal('window', { matchMedia: () => ({ matches: mobile }) })
+  vi.stubGlobal('window', {
+    matchMedia: (query: string) => {
+      const maxWidth = /max-width:\s*(\d+)px/.exec(query)
+      if (!maxWidth) throw new Error(`Unsupported test media query: ${query}`)
+      return { matches: viewportWidth <= Number(maxWidth[1]) }
+    },
+  })
   const getItem = vi.fn((key: string) => key === openedStorageKey(edition.date)
     ? JSON.stringify({ good: true, bad: false, ugly: false })
     : null)
@@ -40,7 +46,7 @@ describe('publication display', () => {
   })
 
   it('keeps mobile headlines concealed while restoring opened state', () => {
-    const { html } = renderEdition(1, true)
+    const { html } = renderEdition(1, 390)
     expect(html).toContain('The Good, opened. Read again')
     expect(html).toContain(`dateTime="${edition.date}"`)
     for (const item of edition.items) expect(html).not.toContain(item.headline)
@@ -60,6 +66,20 @@ describe('publication display', () => {
     expect(html).toContain('Refresh')
     expect(html).not.toContain('<time')
     for (const item of edition.items) expect(html).not.toContain(item.headline)
+  })
+
+  it.each([767, 768, 900, 1023])('offers focused reading at %ipx without revealing saved article headlines', (width) => {
+    const { html } = renderEdition(1, width)
+    expect(html.match(/aria-haspopup="dialog"/g)).toHaveLength(3)
+    expect(html).toContain('The Good, opened. Read again')
+    for (const item of edition.items) expect(html).not.toContain(item.headline)
+  })
+
+  it.each([1024, 1280])('shows saved stories inline at %ipx', (width) => {
+    const { html } = renderEdition(1, width)
+    expect(html).toContain(edition.items[0].headline)
+    expect(html).not.toContain(edition.items[1].headline)
+    expect(html).not.toContain('aria-haspopup')
   })
 })
 

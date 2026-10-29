@@ -11,7 +11,7 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
   const label = labels[item.type]
 
   return (
-    <div className={`story-in flex ${fillHeight ? 'min-h-full' : ''} min-w-0 flex-col break-words px-[clamp(0.9rem,2vw,1.5rem)] py-[clamp(0.9rem,2.2vh,1.5rem)]`}>
+    <div className={`story-in flex ${fillHeight ? 'min-h-full' : ''} min-w-0 flex-col break-words px-[clamp(0.75rem,2vw,1.5rem)] py-[clamp(0.9rem,2.2vh,1.5rem)]`}>
       <p className="mb-[clamp(0.55rem,1.4vh,0.9rem)] font-serif text-[clamp(1rem,1.8vh,1.2rem)] italic leading-none">
         {label}
       </p>
@@ -26,7 +26,7 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
           </li>
         ))}
       </ul>
-      <p className="font-sans text-xs leading-relaxed">
+      <p className="font-sans text-[0.8125rem] leading-relaxed">
         {item.source ? (
           <a
             href={item.source.url}
@@ -39,8 +39,8 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
           </a>
         ) : 'Source not provided'}
       </p>
-      <section aria-label="Editor's note" className="mt-6 border-l border-black pl-3 font-sans text-[clamp(0.85rem,1.55vh,0.95rem)] leading-[1.5]">
-        <h3 className="mb-2 text-xs">Editor's note</h3>
+      <section aria-label="Editor's note" className="mt-6 border-l border-black pl-3 font-sans text-[clamp(0.875rem,1.55vh,0.95rem)] leading-[1.5]">
+        <h3 className="mb-2 text-[0.8125rem]">Editor's note</h3>
         <p>{item.editorNote}</p>
       </section>
     </div>
@@ -80,7 +80,7 @@ export function NewsCard({ item, open, filled, isMobile, onOpen }: NewsCardProps
         </span>
         <span
           aria-hidden="true"
-          className={`mt-2 font-sans text-xs leading-normal ${open ? '' : 'invisible'}`}
+          className={`mt-2 font-sans text-[0.8125rem] leading-normal ${open ? '' : 'invisible'}`}
         >
           Opened
         </span>

@@ -18,13 +18,13 @@ export function Header({
         <h1 className="font-serif text-[clamp(1.05rem,2.2vw,1.55rem)] leading-tight tracking-[-0.02em] text-pretty">
           The Good, The Bad, and The Ugly
         </h1>
-        <p className="mt-1 font-sans text-xs leading-relaxed">
+        <p className="mt-1 font-sans text-[0.8125rem] leading-relaxed">
           Three stories a day. Open a card to read.
         </p>
       </div>
       <time
         dateTime={iso}
-        className="font-sans text-[clamp(0.7rem,1.2vw,0.85rem)]"
+        className="font-sans text-[0.8125rem] leading-relaxed"
       >
         {label}
       </time>

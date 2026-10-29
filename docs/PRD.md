@@ -6,6 +6,8 @@ The following user-approved changes supersede conflicting UI, state, and accepta
 
 - Show the product explanation and category names initially; retain concealed headlines until opened.
 - Mobile reading uses explicit back/next controls, scrollable content, and a small Opened indicator on previously opened cards.
+- Below 1024px, phones and small tablets use the single-story reader; at 1024px and above, stories open in the three columns. The unopened overview retains three category cards at every width.
+- Secondary labels use a 13px floor, editorial notes a 14px floor, and summary text at least 16px. Narrow reading frames use reduced horizontal padding, and the single-story reader is capped at 44rem.
 - Display the actual edition date on desktop and mobile. Key opened state by that date; a calendar rollover alone does not reset progress for unchanged content.
 - If the bundled edition is older than today in Chicago, keep it readable with an explicit unavailable-today notice. Future-dated and invalid editions are unavailable.
 - Articles support a named HTTP(S) source link. Missing sources are stated explicitly, and editorial interpretation is labeled Editor's note.
