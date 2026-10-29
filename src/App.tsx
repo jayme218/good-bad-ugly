@@ -8,6 +8,7 @@ import today from './data/today.json'
 import { parseEdition } from './edition'
 import { emptyOpened, loadOpened, saveOpened } from './openedState'
 import { editorialToday, formatEditionDate } from './timezone'
+import { createReadingPositions } from './readingPosition'
 import type { NewsType } from './types'
 
 const edition = parseEdition(today)
@@ -57,6 +58,7 @@ export default function App() {
   const chicago = useChicagoToday()
   const [opened, setOpened] = useState(() => edition ? loadOpened(edition.date) : emptyOpened())
   const [reading, setReading] = useState<NewsType | null>(null)
+  const [readingPositions] = useState(() => edition ? createReadingPositions(edition.date) : null)
 
   useEffect(() => {
     const media = window.matchMedia(mobileQuery)
@@ -118,9 +120,10 @@ export default function App() {
 
       <Footer visible={allOpened && reading === null} stale={stale} />
 
-      {isMobile && readingItem ? (
+      {isMobile && readingItem && readingPositions ? (
         <StoryReader
           item={readingItem}
+          positions={readingPositions}
           nextType={nextItem?.type}
           onNext={nextItem ? () => open(nextItem.type) : undefined}
           onClose={() => setReading(null)}
