@@ -123,16 +123,29 @@ class Paragraphs(HTMLParser):
         self.parts = []
         self.current = []
         self.in_p = False
+        self.in_pre = False
+        self.pre_current = []
         self.skip = 0
 
     def handle_starttag(self, tag, attrs):
         if tag in ('script','style','nav','footer','header'):
             self.skip += 1
+        if tag == 'pre' and not self.skip:
+            self.in_pre = True
+            self.pre_current = []
+        if tag == 'br' and self.in_pre and not self.skip:
+            self.pre_current.append('\n')
         if tag == 'p' and not self.skip:
             self.current = []
             self.in_p = True
 
     def handle_endtag(self, tag):
+        if tag == 'pre' and self.in_pre:
+            # BLS releases wrap lines inside a paragraph and separate header,
+            # contact details and release paragraphs with a blank line.
+            self.parts.extend(plain(part) for part in re.split(r'\r?\n[ \t]*\r?\n', ''.join(self.pre_current)) if part.strip())
+            self.pre_current = []
+            self.in_pre = False
         if tag == 'p' and self.in_p:
             self.parts.append(plain(''.join(self.current)))
             self.current = []
@@ -141,7 +154,9 @@ class Paragraphs(HTMLParser):
             self.skip -= 1
 
     def handle_data(self, data):
-        if self.in_p and not self.skip:
+        if self.in_pre and not self.skip:
+            self.pre_current.append(data)
+        elif self.in_p and not self.skip:
             self.current.append(data)
 
 
@@ -151,7 +166,7 @@ def excerpts(body):
     paragraphs = parser.parts if parser.parts else [plain(re.sub(r'<[^>]+>', ' ', body))]
     result = []
     for paragraph in paragraphs:
-        if re.search(r'copyright|all rights reserved|subscribe|sign up|media contact|for more information|\bcookie\b', paragraph, re.I):
+        if re.search(r'copyright|all rights reserved|subscribe|sign up|media contact|technical information:|transmission of material|for more information|\bcookie\b', paragraph, re.I):
             continue
         protected = paragraph
         for token in ('U.S.','U.K.','Dr.','Mr.','Ms.','Inc.','e.g.','i.e.'):
@@ -166,16 +181,76 @@ def excerpts(body):
     return []
 
 
+class ArticleBody(HTMLParser):
+    """Capture balanced, explicitly marked article containers, not page chrome."""
+    VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input',
+            'link', 'meta', 'param', 'source', 'track', 'wbr'}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=False)
+        self.depth = 0
+        self.active = []
+        self.completed = []
+
+    def handle_starttag(self, tag, attrs):
+        for capture in self.active:
+            capture['parts'].append(self.get_starttag_text())
+        attributes = dict(attrs)
+        classes = set((attributes.get('class') or '').split())
+        # Drupal body fields are narrower than their enclosing article. BLS
+        # releases mark the release text as bodytext, often containing a pre.
+        body = bool(classes & {'field--name-body', 'field-name-body', 'body-content'})
+        body = body or attributes.get('id') == 'bodytext'
+        if body or tag == 'article':
+            self.active.append({'depth': self.depth, 'rank': 0 if body else 1, 'parts': []})
+        if tag not in self.VOID:
+            self.depth += 1
+
+    def handle_startendtag(self, tag, attrs):
+        for capture in self.active:
+            capture['parts'].append(self.get_starttag_text())
+
+    def handle_endtag(self, tag):
+        if tag in self.VOID:
+            return
+        self.depth = max(0, self.depth - 1)
+        remaining = []
+        for capture in self.active:
+            if capture['depth'] == self.depth:
+                self.completed.append((capture['rank'], ''.join(capture['parts'])))
+            else:
+                capture['parts'].append(f'</{tag}>')
+                remaining.append(capture)
+        self.active = remaining
+
+    def handle_data(self, data):
+        for capture in self.active:
+            capture['parts'].append(data)
+
+    def handle_entityref(self, name):
+        self.handle_data(f'&{name};')
+
+    def handle_charref(self, name):
+        self.handle_data(f'&#{name};')
+
+
 def article_body(data):
-    text = data.decode('utf-8',errors='replace')
-    # Restrict fallback extraction to a semantic article, never a whole page/menu.
-    match = re.search(r'<article\b[^>]*>(.*?)</article\s*>', text, re.I|re.S)
-    if not match:
-        # Drupal agency releases expose field--name-body inside main content.
-        match = re.search(r'<(?:div|section)[^>]+class=["\'][^"\']*(?:field--name-body|field-name-body|body-content)[^"\']*["\'][^>]*>(.*?)(?:<footer|<div[^>]+(?:field--name-field|field-name-field))',text,re.I|re.S)
-    if not match:
+    parser = ArticleBody()
+    parser.feed(data.decode('utf-8', errors='replace'))
+    if not parser.completed:
         raise ValueError('source has no recognized article body')
-    return match.group(1)
+    return min(parser.completed, key=lambda capture: capture[0])[1]
+
+
+UGLY_TITLE = r'\b(deceiv\w*|deceptive|misleading|fraud\w*|scam\w*|sue[sd]?|charges?|impersonation)\b'
+
+
+def possible_category(entry, spec):
+    # Good is intentionally title-based. Bad and Ugly need the article text;
+    # a short feed teaser must not prevent looking for supporting statements.
+    return ('good' in spec['categories'] and category(entry, spec) == 'good'
+            or 'bad' in spec['categories']
+            or 'ugly' in spec['categories'] and re.search(UGLY_TITLE, entry['title'], re.I))
 
 
 def category(entry, spec):
@@ -189,8 +264,8 @@ def category(entry, spec):
     if 'bad' in spec['categories']:
         if re.search(r'\b(unemployment (?:rate )?(?:rose|increased)|prices (?:rose|increased)|employment (?:fell|declined|decreased)|fatal injuries|job losses|inflation (?:rose|increased))\b',body):
             return 'bad'
-    if 'ugly' in spec['categories'] and re.search(r'\b(deceptive|misleading|fraud\w*|scam\w*|sues|charges|impersonation)\b',title):
-        if re.search(r'\b(alleg\w*|complaint|charged|charges|sues|deceptive|misleading|fraud)\b',body):
+    if 'ugly' in spec['categories'] and re.search(UGLY_TITLE,title):
+        if re.search(r'\b(alleg\w*|complaint|charged|charges|sue[sd]?|deceiv\w*|deceptive|misleading|fraud)\b',body):
             return 'ugly'
     return None
 
@@ -221,22 +296,27 @@ def collect(specs, now, used):
             if entry['url'] in used:
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'recently used'})
                 continue
-            kind = category(entry,spec)
-            if not kind:
+            if not possible_category(entry,spec):
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match'})
                 continue
+            kind = category(entry,spec)
             passages = excerpts(entry['body'])
-            if not passages:
+            if not kind or not passages:
                 if body_fetches >= MAX_ARTICLES_PER_SOURCE:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':'article request budget exhausted'})
                     continue
                 body_fetches += 1
                 try:
                     body = article_body(fetch(entry['url'],spec))
+                    entry = {**entry, 'body': body}
+                    kind = category(entry,spec)
                     passages = excerpts(body)
                 except Exception as error:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':str(error)[:200]})
                     continue
+            if not kind:
+                reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match in article body'})
+                continue
             if len(passages) != 3:
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'fewer than three supported full sentences'})
                 continue

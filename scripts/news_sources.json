@@ -1,24 +1,58 @@
 [
   {
-    "id": "nasa", "name": "NASA", "family": "science", "categories": ["good"],
-    "hosts": ["www.nasa.gov", "science.nasa.gov"],
-    "feeds": ["https://www.nasa.gov/feed/"],
+    "id": "nasa",
+    "name": "NASA",
+    "family": "science",
+    "categories": [
+      "good"
+    ],
+    "hosts": [
+      "www.nasa.gov",
+      "science.nasa.gov"
+    ],
+    "feeds": [
+      "https://www.nasa.gov/feed/",
+      "https://www.nasa.gov/feed/?paged=2",
+      "https://www.nasa.gov/feed/?paged=3"
+    ],
     "feedDocumentation": "https://www.nasa.gov/rss-feeds/",
     "reusePolicy": "https://www.nasa.gov/nasa-brand-center/images-and-media/",
     "scope": "Attributed official article text only; no images, logos or third-party credits."
   },
   {
-    "id": "bls", "name": "U.S. Bureau of Labor Statistics", "family": "economy", "categories": ["bad"],
-    "hosts": ["www.bls.gov"],
-    "feeds": ["https://www.bls.gov/feed/laus.rss", "https://www.bls.gov/feed/empsit.rss", "https://www.bls.gov/feed/cpi.rss"],
+    "id": "bls",
+    "name": "U.S. Bureau of Labor Statistics",
+    "family": "economy",
+    "categories": [
+      "bad"
+    ],
+    "hosts": [
+      "www.bls.gov"
+    ],
+    "feeds": [
+      "https://www.bls.gov/feed/metro.rss",
+      "https://www.bls.gov/feed/laus.rss",
+      "https://www.bls.gov/feed/empsit.rss",
+      "https://www.bls.gov/feed/cpi.rss",
+      "https://www.bls.gov/feed/osh.rss"
+    ],
     "feedDocumentation": "https://www.bls.gov/feed/",
     "reusePolicy": "https://www.bls.gov/opub/copyright-information.htm",
     "scope": "Attributed official statistical release text; category requires an explicit adverse development."
   },
   {
-    "id": "ftc", "name": "Federal Trade Commission", "family": "consumer-protection", "categories": ["ugly"],
-    "hosts": ["www.ftc.gov"],
-    "feeds": ["https://www.ftc.gov/feeds/press-release.xml"],
+    "id": "ftc",
+    "name": "Federal Trade Commission",
+    "family": "consumer-protection",
+    "categories": [
+      "ugly"
+    ],
+    "hosts": [
+      "www.ftc.gov"
+    ],
+    "feeds": [
+      "https://www.ftc.gov/feeds/press-release.xml"
+    ],
     "feedDocumentation": "https://www.ftc.gov/stay-connected/rss",
     "reusePolicy": "https://www.ftc.gov/policy-notices/website-policy",
     "scope": "Attributed FTC press releases only; excludes filings, comments, images and third-party material. Allegations remain allegations."

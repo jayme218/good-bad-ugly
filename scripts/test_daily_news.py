@@ -40,6 +40,64 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(sentences[0],'NASA discovered a new system with three planets.')
         self.assertEqual(news.excerpts('<p>Just a title without enough context.</p>'),[])
 
+    def test_scoped_drupal_body_excludes_surrounding_article_content(self):
+        page = b'<nav><p>Navigation must never become a summary sentence.</p></nav><article><header><p>An unrelated header sentence with sufficient length.</p></header><div class="field field--name-body field--type-text-with-summary"><div class="field__item"><p>The FTC alleges that consumers paid unauthorized subscription charges.</p><p>The complaint says the company continued billing after cancellation.</p><p>The allegations remain subject to a decision by the federal court.</p></div></div><footer><p>An unrelated footer sentence with sufficient length.</p></footer></article>'
+        body = news.article_body(page)
+        self.assertNotIn('header sentence', body)
+        self.assertNotIn('footer sentence', body)
+        self.assertNotIn('Navigation', body)
+        self.assertEqual(len(news.excerpts(body)), 3)
+        with self.assertRaises(ValueError):
+            news.article_body(b'<main><nav><p>No recognized article here.</p></nav></main>')
+
+    def test_bls_preformatted_release_body(self):
+        page = b'<main><div id="bodytext"><pre>Employment declined in several metropolitan areas during September. The unemployment rate increased in a number of other metropolitan areas. These estimates are based on the household and establishment surveys.</pre></div><p>Site contact information outside the release body.</p></main>'
+        body = news.article_body(page)
+        self.assertNotIn('Site contact', body)
+        self.assertEqual(len(news.excerpts(body)), 3)
+
+    def test_bls_pre_contact_block_does_not_discard_release_paragraphs(self):
+        page = b'<div id="bodytext"><pre>USDL-26-0000\nTransmission of material is embargoed.\n\nMedia contact: (202) 691-5902\nTechnical information: (202) 691-6392\n\nOver the year, employment decreased in Washington-Arlington-Alexandria\nand several other metropolitan areas.\n\nThe unemployment rate increased in a number of other metropolitan areas.\n\nThese estimates are based on the household and establishment surveys.</pre></div>'
+        lines = news.excerpts(news.article_body(page))
+        self.assertEqual(len(lines), 3)
+        self.assertEqual(lines[0], 'Over the year, employment decreased in Washington-Arlington-Alexandria and several other metropolitan areas.')
+        self.assertFalse(any('contact' in line.lower() or 'embargoed' in line for line in lines))
+
+    def collect_with_teaser(self, kind, title, body):
+        spec = {**SPEC, 'categories':[kind], 'feeds':['https://www.nasa.gov/feed/']}
+        entry = {'title':title, 'url':'https://www.nasa.gov/release', 'published':NOW, 'body':'A short feed teaser.'}
+        with patch.object(news,'parse_feed',return_value=[entry]), patch.object(news,'fetch',side_effect=[b'<rss/>',body.encode()]) as fetch:
+            candidates, reports = news.collect([spec],NOW,set())
+        self.assertEqual(fetch.call_count, 2)
+        return candidates, reports
+
+    def test_short_feed_teaser_does_not_prevent_body_classification(self):
+        body = '<article><p>Employment declined in several metropolitan areas during September. The unemployment rate increased in a number of other metropolitan areas. These estimates are based on the household and establishment surveys.</p></article>'
+        candidates, reports = self.collect_with_teaser('bad','Metropolitan employment release',body)
+        self.assertEqual(reports, [])
+        self.assertEqual(candidates[0]['type'], 'bad')
+        self.assertIn('Employment declined', candidates[0]['item']['summaries'][0])
+
+    def test_ugly_sue_title_requires_supporting_article_allegation(self):
+        body = '<article><p>The FTC alleges that consumers paid unauthorized subscription charges. The complaint says the company continued billing after cancellation. These allegations remain subject to a decision by the federal court.</p></article>'
+        candidates, reports = self.collect_with_teaser('ugly','FTC and States Sue Company Over Deceptive Fees',body)
+        self.assertEqual(reports, [])
+        self.assertEqual(candidates[0]['type'], 'ugly')
+        self.assertIn('alleges', candidates[0]['item']['summaries'][0])
+        neutral = '<article><p>The agency published a detailed report about its public outreach work. The announcement describes several meetings scheduled for next month. Members of the public can read the complete report on the agency website.</p></article>'
+        candidates, reports = self.collect_with_teaser('ugly','Agency Discusses Scam Awareness',neutral)
+        self.assertEqual(candidates, [])
+        self.assertIn('no conservative category match', reports[0]['reason'])
+
+    def test_full_body_requests_stay_within_budget(self):
+        spec = {**SPEC, 'categories':['bad'], 'feeds':['https://www.nasa.gov/feed/']}
+        entries = [{'title':'Employment report', 'url':f'https://www.nasa.gov/{i}', 'published':NOW, 'body':'Short teaser.'} for i in range(10)]
+        with patch.object(news,'parse_feed',return_value=entries), patch.object(news,'fetch',return_value=b'<article><p>No relevant adverse development.</p></article>') as fetch:
+            candidates, reports = news.collect([spec],NOW,set())
+        self.assertEqual(candidates, [])
+        self.assertEqual(fetch.call_count, 1 + news.MAX_ARTICLES_PER_SOURCE)
+        self.assertEqual(sum(r['reason']=='article request budget exhausted' for r in reports),4)
+
     def test_shortage_and_duplicate(self):
         candidate={'type':'good','family':'science','url':'https://www.nasa.gov/a','published':NOW,'item':{},'audit':{}}
         self.assertIsNone(news.select_edition([candidate],set(),NOW))
