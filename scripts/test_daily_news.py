@@ -106,6 +106,30 @@ class CollectorTests(unittest.TestCase):
         selected = {'title':item['headline'], 'body':' '.join(item['summaries'])}
         self.assertEqual(news.category(selected, {'categories':['bad']}), 'bad')
 
+    def test_ugly_selected_passages_include_actual_alleged_wrongdoing(self):
+        opening = 'The company markets and sells payment processing services to small businesses.'
+        context = 'Its products are used to manage orders and accept payments from customers.'
+        neutral = 'The company sells its software through an annual subscription service.'
+        allegation = 'The FTC alleges that the company deceptively concealed unauthorized subscription fees.'
+        body = '<article><p>' + ' '.join([opening,context,neutral,allegation]) + '</p></article>'
+        candidates, reports = self.collect_with_teaser('ugly','FTC Takes Action Over Deceptive Subscription Fees',body)
+        self.assertEqual(reports, [])
+        item = candidates[0]['item']
+        self.assertTrue(item['summaries'][0].endswith(opening))
+        self.assertTrue(item['summaries'][1].endswith(context))
+        self.assertTrue(item['summaries'][2].endswith(allegation))
+        selected = {'title':item['headline'], 'body':' '.join(item['summaries'])}
+        # The source title, rather than a shortened card title, drives selection.
+        selected['title'] = candidates[0]['audit']['sourceTitle']
+        self.assertEqual(news.category(selected, {'categories':['ugly']}), 'ugly')
+        self.assertIsNone(news.category({'title':selected['title'], 'body':'The agency sues a company and charges a filing fee.'}, {'categories':['ugly']}))
+
+    def test_generic_complaint_and_business_description_are_not_wrongdoing_evidence(self):
+        body = '<article><p>The agency filed a complaint in federal court against the company. The company sells payment processing software to small businesses. Customers use the software to take orders and manage their inventory.</p></article>'
+        candidates, reports = self.collect_with_teaser('ugly','FTC Takes Action Over Deceptive Subscription Fees',body)
+        self.assertEqual(candidates, [])
+        self.assertIn('no conservative category match', reports[0]['reason'])
+
     def test_quote_fragments_are_omitted_and_unquoted_sentences_preferred(self):
         plain_sentences = ['The complaint alleges that consumers paid unauthorized subscription charges.',
                            'Customers reported that the company continued charging after cancellation.',

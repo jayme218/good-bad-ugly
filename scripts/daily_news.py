@@ -282,6 +282,8 @@ def article_body(data):
 
 
 UGLY_EXCLUDED = r'\b(highlights? efforts|warn\w*|awareness|tips|inquiry|seeks? (?:public )?comment)\b'
+UGLY_BODY_PATTERN = r'\b(deceiv\w*|deceptive|misleading|fraud\w*|scam\w*|unauthori[sz]ed|hidden fees|without consent|overcharg\w*|false claims)\b'
+EVIDENCE_PATTERNS = {'bad': BAD_PATTERN, 'ugly': UGLY_BODY_PATTERN}
 UGLY_TITLE = r'\b(deceiv\w*|deceptive|misleading|fraud\w*|scam\w*|sue[sd]?|charges?|impersonation)\b'
 
 
@@ -306,7 +308,7 @@ def category(entry, spec):
         if re.search(BAD_PATTERN,body):
             return 'bad'
     if 'ugly' in spec['categories'] and not re.search(UGLY_EXCLUDED,title) and re.search(UGLY_TITLE,title):
-        if re.search(r'\b(alleg\w*|complaint|charged|charges|sue[sd]?|deceiv\w*|deceptive|misleading|fraud)\b',body):
+        if re.search(UGLY_BODY_PATTERN,body):
             return 'ugly'
     return None
 
@@ -341,7 +343,7 @@ def collect(specs, now, used):
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match'})
                 continue
             kind = category(entry,spec)
-            passages = excerpts(entry['body'], BAD_PATTERN if kind == 'bad' else None)
+            passages = excerpts(entry['body'], EVIDENCE_PATTERNS.get(kind))
             if not kind or not passages:
                 if body_fetches >= MAX_ARTICLES_PER_SOURCE:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':'article request budget exhausted'})
@@ -351,7 +353,7 @@ def collect(specs, now, used):
                     body = article_body(fetch(entry['url'],spec))
                     entry = {**entry, 'body': body}
                     kind = category(entry,spec)
-                    passages = excerpts(body, BAD_PATTERN if kind == 'bad' else None)
+                    passages = excerpts(body, EVIDENCE_PATTERNS.get(kind))
                 except Exception as error:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':str(error)[:200]})
                     continue
