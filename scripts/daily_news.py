@@ -160,7 +160,29 @@ class Paragraphs(HTMLParser):
             self.current.append(data)
 
 
-def excerpts(body):
+BAD_HEADLINES = (
+    (r'\bemployment (?:fell|declined|decreased)\b', 'Employment declines reported'),
+    (r'\bunemployment (?:rate )?(?:rose|increased)\b', 'Unemployment rises reported'),
+    (r'\bprices (?:rose|increased)\b', 'Price increases reported'),
+    (r'\bfatal injuries\b', 'Fatal injuries reported'),
+    (r'\bjob losses\b', 'Job losses reported'),
+    (r'\binflation (?:rose|increased)\b', 'Inflation increases reported'),
+)
+BAD_PATTERN = '|'.join(pattern for pattern, _ in BAD_HEADLINES)
+
+
+def bad_headline(passages):
+    for pattern, headline in BAD_HEADLINES:
+        if any(re.search(pattern, passage, re.I) for passage in passages):
+            return headline
+    return None
+
+
+def complete_quotes(sentence):
+    return sentence.count('“') == sentence.count('”') and sentence.count('"') % 2 == 0
+
+
+def excerpts(body, required_pattern=None):
     parser = Paragraphs()
     parser.feed(body)
     paragraphs = parser.parts if parser.parts else [plain(re.sub(r'<[^>]+>', ' ', body))]
@@ -172,13 +194,30 @@ def excerpts(body):
         for token in ('U.S.','U.K.','Dr.','Mr.','Ms.','Inc.','e.g.','i.e.'):
             protected = protected.replace(token,token.replace('.','∯'))
         sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z“"0-9])', protected)
+        in_curly_quote = in_ascii_quote = False
         for sentence in sentences:
             sentence = sentence.replace('∯','.')
-            if 45 <= len(sentence) <= 360 and re.search(r'[.!?][”"\']?$',sentence) and sentence not in result:
+            continuation = in_curly_quote or in_ascii_quote
+            for char in sentence:
+                if char == '“':
+                    in_curly_quote = True
+                elif char == '”':
+                    in_curly_quote = False
+                elif char == '"':
+                    in_ascii_quote = not in_ascii_quote
+            if not continuation and 45 <= len(sentence) <= 360 and re.search(r'[.!?][”"\']?$',sentence) and complete_quotes(sentence) and sentence not in result:
                 result.append(sentence)
-            if len(result) == 3:
-                return result
-    return []
+    unquoted = [sentence for sentence in result if not re.search(r'[“”"]', sentence)]
+    preferred = unquoted if len(unquoted) >= 3 else result
+    if len(preferred) < 3:
+        return []
+    selected = preferred[:3]
+    if required_pattern and not any(re.search(required_pattern, sentence, re.I) for sentence in selected):
+        evidence = next((sentence for sentence in preferred if re.search(required_pattern, sentence, re.I)), None)
+        if evidence is None:
+            return []
+        selected[-1] = evidence
+    return selected
 
 
 class ArticleBody(HTMLParser):
@@ -242,6 +281,7 @@ def article_body(data):
     return min(parser.completed, key=lambda capture: capture[0])[1]
 
 
+UGLY_EXCLUDED = r'\b(highlights? efforts|warn\w*|awareness|tips|inquiry|seeks? (?:public )?comment)\b'
 UGLY_TITLE = r'\b(deceiv\w*|deceptive|misleading|fraud\w*|scam\w*|sue[sd]?|charges?|impersonation)\b'
 
 
@@ -250,7 +290,8 @@ def possible_category(entry, spec):
     # a short feed teaser must not prevent looking for supporting statements.
     return ('good' in spec['categories'] and category(entry, spec) == 'good'
             or 'bad' in spec['categories']
-            or 'ugly' in spec['categories'] and re.search(UGLY_TITLE, entry['title'], re.I))
+            or 'ugly' in spec['categories'] and not re.search(UGLY_EXCLUDED, entry['title'], re.I)
+            and re.search(UGLY_TITLE, entry['title'], re.I))
 
 
 def category(entry, spec):
@@ -262,9 +303,9 @@ def category(entry, spec):
         if re.search(r'\b(discover\w*|achiev\w*|success\w*|complet\w*|selects|advanc\w*|improv\w*)\b',title):
             return 'good'
     if 'bad' in spec['categories']:
-        if re.search(r'\b(unemployment (?:rate )?(?:rose|increased)|prices (?:rose|increased)|employment (?:fell|declined|decreased)|fatal injuries|job losses|inflation (?:rose|increased))\b',body):
+        if re.search(BAD_PATTERN,body):
             return 'bad'
-    if 'ugly' in spec['categories'] and re.search(UGLY_TITLE,title):
+    if 'ugly' in spec['categories'] and not re.search(UGLY_EXCLUDED,title) and re.search(UGLY_TITLE,title):
         if re.search(r'\b(alleg\w*|complaint|charged|charges|sue[sd]?|deceiv\w*|deceptive|misleading|fraud)\b',body):
             return 'ugly'
     return None
@@ -300,7 +341,7 @@ def collect(specs, now, used):
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match'})
                 continue
             kind = category(entry,spec)
-            passages = excerpts(entry['body'])
+            passages = excerpts(entry['body'], BAD_PATTERN if kind == 'bad' else None)
             if not kind or not passages:
                 if body_fetches >= MAX_ARTICLES_PER_SOURCE:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':'article request budget exhausted'})
@@ -310,7 +351,7 @@ def collect(specs, now, used):
                     body = article_body(fetch(entry['url'],spec))
                     entry = {**entry, 'body': body}
                     kind = category(entry,spec)
-                    passages = excerpts(body)
+                    passages = excerpts(body, BAD_PATTERN if kind == 'bad' else None)
                 except Exception as error:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':str(error)[:200]})
                     continue
@@ -321,7 +362,7 @@ def collect(specs, now, used):
                 reports.append({'source':spec['id'],'url':entry['url'],'reason':'fewer than three supported full sentences'})
                 continue
             # Every bullet is explicitly a source statement, not an independent finding.
-            item = {'type':kind,'headline':shorten(entry['title']),
+            item = {'type':kind,'headline':bad_headline(passages) if kind == 'bad' else shorten(entry['title']),
                     'summaries':[f"{spec['name']} reports: {s}" for s in passages],
                     'editorNote':f"Automatically selected and excerpted from {spec['name']}. Category assignment is editorial; this draft has not been independently fact-checked.",
                     'source':{'name':spec['name'],'url':entry['url'],'publishedAt':entry['published'].date().isoformat()}}

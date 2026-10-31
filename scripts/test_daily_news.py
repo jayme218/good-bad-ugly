@@ -85,9 +85,46 @@ class CollectorTests(unittest.TestCase):
         self.assertEqual(candidates[0]['type'], 'ugly')
         self.assertIn('alleges', candidates[0]['item']['summaries'][0])
         neutral = '<article><p>The agency published a detailed report about its public outreach work. The announcement describes several meetings scheduled for next month. Members of the public can read the complete report on the agency website.</p></article>'
-        candidates, reports = self.collect_with_teaser('ugly','Agency Discusses Scam Awareness',neutral)
+        candidates, reports = self.collect_with_teaser('ugly','Agency Discusses Scam Reports',neutral)
         self.assertEqual(candidates, [])
         self.assertIn('no conservative category match', reports[0]['reason'])
+
+    def test_mixed_employment_report_keeps_context_and_adverse_evidence(self):
+        opening = 'Unemployment rates were lower in 226 areas, higher in 138 areas, and unchanged in 23 areas.'
+        context = 'Most metropolitan areas had little change in their payroll employment over the year.'
+        mixed = 'Nonfarm payroll employment increased in 11 areas, decreased in 3 areas, and was unchanged in 373 areas.'
+        adverse = 'Over the year, employment decreased in Washington-Arlington-Alexandria and two other metropolitan areas.'
+        body = '<article><p>' + ' '.join([opening,context,mixed,adverse]) + '</p></article>'
+        candidates, reports = self.collect_with_teaser('bad','Jobless rates down in most metropolitan areas',body)
+        self.assertEqual(reports, [])
+        item = candidates[0]['item']
+        self.assertEqual(item['headline'], 'Employment declines reported')
+        self.assertTrue(item['summaries'][0].endswith(opening))
+        self.assertTrue(item['summaries'][1].endswith(context))
+        self.assertTrue(item['summaries'][2].endswith(adverse))
+        self.assertEqual(candidates[0]['audit']['sourceTitle'], 'Jobless rates down in most metropolitan areas')
+        selected = {'title':item['headline'], 'body':' '.join(item['summaries'])}
+        self.assertEqual(news.category(selected, {'categories':['bad']}), 'bad')
+
+    def test_quote_fragments_are_omitted_and_unquoted_sentences_preferred(self):
+        plain_sentences = ['The complaint alleges that consumers paid unauthorized subscription charges.',
+                           'Customers reported that the company continued charging after cancellation.',
+                           'The allegations remain subject to a decision by the federal court.']
+        for opening, closing in [('“','”'), ('"','"')]:
+            quote = opening + 'The agency takes these allegations very seriously. Consumers deserve clear and accurate subscription terms. The court will consider the evidence in this case.' + closing
+            body = '<p>' + quote + '</p><p>' + ' '.join(plain_sentences) + '</p>'
+            self.assertEqual(news.excerpts(body), plain_sentences)
+        balanced = '<p>“The agency takes these allegations very seriously,” the director said.</p><p>' + ' '.join(plain_sentences) + '</p>'
+        self.assertEqual(news.excerpts(balanced), plain_sentences)
+
+    def test_ugly_prefilter_excludes_wrapups_warnings_and_inquiries(self):
+        spec = {'categories':['ugly']}
+        for title in ['FTC Highlights Efforts to Combat Imposter Scams', 'FTC Warns Marketers Against Deceptive Claims', 'FTC Opens Inquiry Into Potential Fraud', 'FTC Shares Scam Awareness Tips']:
+            with self.subTest(title=title):
+                entry = {'title':title, 'body':'The complaint alleges fraud and deceptive claims.'}
+                self.assertFalse(news.possible_category(entry,spec))
+                self.assertIsNone(news.category(entry,spec))
+        self.assertTrue(news.possible_category({'title':'FTC and States Sue Company Over Deceptive Fees'},spec))
 
     def test_full_body_requests_stay_within_budget(self):
         spec = {**SPEC, 'categories':['bad'], 'feeds':['https://www.nasa.gov/feed/']}
