@@ -5,12 +5,14 @@ export interface NewsItem {
   headline: string
   summaries: string[]
   editorNote: string
-  source?: { name: string; url: string }
+  source?: { name: string; url: string; publishedAt?: string }
 }
 
 export interface Edition {
   date: string
   timezone: 'America/Chicago'
+  revision?: number
+  reviewStatus?: 'automated' | 'reviewed'
   items: [NewsItem, NewsItem, NewsItem]
 }
 

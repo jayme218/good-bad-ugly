@@ -1,0 +1,208 @@
+name: Daily edition and Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '17 7 * * *'
+      timezone: America/Chicago
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Test source collection without committing or deploying
+        required: true
+        type: boolean
+        default: true
+
+# The current site is public already. Never add a paid runner, API or model here.
+permissions: {}
+
+concurrency:
+  group: edition-publication
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dry_run:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch' && inputs.dry_run
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the collection code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Test the collection rules
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Test live sources without publication
+        run: |
+          set -euo pipefail
+          python3 scripts/daily_news.py --dry-run --output "$RUNNER_TEMP/draft-result.json"
+          python3 - <<'REPORT'
+          import json, os
+          from pathlib import Path
+          result = json.loads((Path(os.environ['RUNNER_TEMP']) / 'draft-result.json').read_text())
+          status = result.get('status')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'## Live dry run\n\nOutcome: **{status}**. No content was committed or deployed.\n')
+              if status != 'draft':
+                  summary.write('No eligible three-story draft was produced. Automatic publishing must remain disabled.\n')
+          REPORT
+
+  collect:
+    if: >-
+      vars.DAILY_PUBLISHING_ENABLED == 'true' && github.ref == 'refs/heads/main' &&
+      github.event_name != 'push' &&
+      (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.publish.outputs.commit }}
+    steps:
+      - name: Check out the latest publishing branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Remember the branch version before collecting
+        id: start
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Install the locked app dependencies
+        run: npm ci
+      - name: Test the collection rules
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Collect an eligible daily draft
+        id: draft
+        run: |
+          set -euo pipefail
+          python3 scripts/daily_news.py --write | tee "$RUNNER_TEMP/collection-result.json"
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          result = json.loads((Path(os.environ['RUNNER_TEMP']) / 'collection-result.json').read_text())
+          status = result.get('status')
+          if status not in ('published', 'skipped'):
+              raise SystemExit('Collector did not produce a valid publication outcome')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'status={status}\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write(f'## Daily collection\n\nOutcome: **{status}**. ')
+              summary.write('A skipped collection keeps the previous edition unchanged. See the collector log for exclusions.\n')
+          PY
+      - name: Validate the app and candidate before committing
+        run: |
+          npm test
+          npm run lint
+          npm run build -- --base=/good-bad-ugly/
+          cmp src/data/today.json dist/edition.json
+          git diff --check
+      - name: Publish only if the owner has not changed the branch
+        id: publish
+        env:
+          START_COMMIT: ${{ steps.start.outputs.commit }}
+          DRAFT_STATUS: ${{ steps.draft.outputs.status }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          if [[ "$(git rev-parse origin/main)" != "$START_COMMIT" ]]; then
+            echo 'The publishing branch changed during collection. Nothing was committed; rerun against the owner edits.' >&2
+            exit 1
+          fi
+          if [[ "$DRAFT_STATUS" == 'published' ]]; then
+            git add -- src/data/today.json scripts/data/editorial-record.json scripts/data/recent-articles.json
+            if git diff --cached --quiet; then
+              echo 'Collector reported publication without a content change.' >&2
+              exit 1
+            fi
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m 'Publish automatically prepared daily edition'
+            # A concurrent owner push rejects this non-forced push; never rebase over it.
+            git push origin HEAD:main
+          elif [[ -n "$(git status --porcelain -- src/data/today.json scripts/data/editorial-record.json scripts/data/recent-articles.json)" ]]; then
+            echo 'A skipped collection unexpectedly changed publishing files.' >&2
+            exit 1
+          fi
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: collect
+    if: >-
+      always() && vars.DAILY_PUBLISHING_ENABLED == 'true' && github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
+      (needs.collect.result == 'success' || needs.collect.result == 'skipped')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      current: ${{ steps.current.outputs.current }}
+    steps:
+      - name: Check out the content that will be deployed
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ needs.collect.outputs.commit || github.sha }}
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Install the locked app dependencies
+        run: npm ci
+      - name: Verify data and app
+        run: |
+          python3 -m unittest discover -s scripts -p 'test_*.py'
+          npm test
+          npm run lint
+          npm run build -- --base=/good-bad-ugly/
+          cmp src/data/today.json dist/edition.json
+      - name: Check that a newer owner change has not superseded this build
+        id: current
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          if [[ "$(git rev-parse HEAD)" == "$(git rev-parse origin/main)" ]]; then
+            echo 'current=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'current=false' >> "$GITHUB_OUTPUT"
+            echo 'A newer main commit exists; its run will publish the current version.' >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Read the configured Pages site
+        if: steps.current.outputs.current == 'true'
+        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      - name: Upload the Pages build
+        if: steps.current.outputs.current == 'true'
+        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+        with:
+          path: dist
+          retention-days: 1
+
+  deploy:
+    needs: build
+    if: needs.build.result == 'success' && needs.build.outputs.current == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      # Bot commits do not need to trigger a second workflow: deploy this build explicitly.
+      - name: Deploy the validated site
+        id: deployment
+        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4

@@ -9,8 +9,8 @@ export function clampReadingPosition(position: number, scrollHeight: number, cli
   return Math.min(validOffset(position) ? position : 0, Math.max(0, scrollHeight - clientHeight))
 }
 
-export function createReadingPositions(editionDate: string) {
-  const key = `gbu:reading:${editionDate}`
+export function createReadingPositions(editionDate: string, revision = 0) {
+  const key = `gbu:reading:${editionDate}${revision > 0 ? `:revision:${revision}` : ''}`
   const offsets: Record<NewsType, number> = { good: 0, bad: 0, ugly: 0 }
   try {
     const stored: unknown = JSON.parse(sessionStorage.getItem(key) ?? 'null')

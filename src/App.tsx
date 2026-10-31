@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { EditionUpdateNotice } from './components/EditionUpdateNotice'
-import { createEditionChecker } from './editionUpdates'
+import { compareEditions, createEditionChecker } from './editionUpdates'
 import type { Edition } from './types'
 import { Footer } from './components/Footer'
 import { Header } from './components/Header'
@@ -60,6 +60,8 @@ export default function App() {
   const [edition, setEdition] = useState(bundledEdition)
   const [pendingEdition, setPendingEdition] = useState<Edition | null>(null)
   const editionDate = edition?.date ?? null
+  const editionRevision = edition?.revision ?? 0
+  const editionIdentity = edition ? `${edition.date}:${editionRevision}` : 'unavailable'
   const focusNewEdition = useRef(false)
 
   useEffect(() => {
@@ -67,12 +69,12 @@ export default function App() {
     focusNewEdition.current = false
     const firstStory = document.getElementById('story-trigger-good') ?? document.querySelector<HTMLElement>('.story-article')
     firstStory?.focus({ preventScroll: true })
-  }, [editionDate])
+  }, [editionIdentity])
 
   useEffect(() => {
     const checker = createEditionChecker(`${import.meta.env.BASE_URL}edition.json`, editionDate, (candidate) => {
-      setPendingEdition((current) => !current || candidate.date > current.date ? candidate : current)
-    })
+      setPendingEdition((current) => !current || compareEditions(candidate, current) > 0 ? candidate : current)
+    }, fetch, editionRevision)
     function checkWhenVisible() {
       if (document.visibilityState !== 'hidden') void checker.check()
     }
@@ -84,10 +86,11 @@ export default function App() {
       window.removeEventListener('focus', checkWhenVisible)
       document.removeEventListener('visibilitychange', checkWhenVisible)
     }
-  }, [editionDate])
+  }, [editionDate, editionRevision])
 
   function readNewEdition() {
     if (!pendingEdition || pendingEdition.date > editorialToday().iso) return
+    if (edition && edition.date <= editorialToday().iso && compareEditions(pendingEdition, edition) <= 0) return
     focusNewEdition.current = true
     setEdition(pendingEdition)
     setPendingEdition(null)
@@ -95,7 +98,7 @@ export default function App() {
 
   return (
     <EditionView
-      key={editionDate ?? 'unavailable'}
+      key={editionIdentity}
       edition={edition}
       pendingEdition={pendingEdition}
       onReadNewEdition={readNewEdition}
@@ -112,7 +115,7 @@ function EditionView({ edition, pendingEdition, onReadNewEdition }: {
   const chicago = useChicagoToday()
   const [opened, setOpened] = useState(() => edition ? loadOpened(edition.date) : emptyOpened())
   const [reading, setReading] = useState<NewsType | null>(null)
-  const [readingPositions] = useState(() => edition ? createReadingPositions(edition.date) : null)
+  const [readingPositions] = useState(() => edition ? createReadingPositions(edition.date, edition.revision ?? 0) : null)
 
   useEffect(() => {
     const media = window.matchMedia(mobileQuery)
@@ -157,10 +160,11 @@ function EditionView({ edition, pendingEdition, onReadNewEdition }: {
         iso={editionDate}
         label={formatEditionDate(editionDate)}
         stale={stale}
+        reviewStatus={edition.reviewStatus}
       />
 
       {reading === null && pendingEdition ? (
-        <EditionUpdateNotice edition={pendingEdition} onRead={onReadNewEdition} />
+        <EditionUpdateNotice edition={pendingEdition} isCorrection={pendingEdition.date === edition.date} onRead={onReadNewEdition} />
       ) : null}
 
       <main

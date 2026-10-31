@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import type { NewsItem, NewsType } from '../types'
+import { formatEditionDate } from '../timezone'
 
 const labels: Record<NewsType, string> = {
   good: 'The Good',
@@ -38,6 +39,11 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
             <span className="sr-only"> (opens in a new tab)</span>
           </a>
         ) : 'Source not provided'}
+        {item.source?.publishedAt ? (
+          <span className="mt-1 block">
+            Published <time dateTime={item.source.publishedAt}>{formatEditionDate(item.source.publishedAt)}</time>
+          </span>
+        ) : null}
       </p>
       <section aria-label="Editor's note" className="mt-6 border-l border-black pl-3 font-sans text-[clamp(0.875rem,1.55vh,0.95rem)] leading-[1.5]">
         <h3 className="mb-2 text-[0.8125rem]">Editor's note</h3>

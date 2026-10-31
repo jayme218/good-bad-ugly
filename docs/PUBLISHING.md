@@ -1,5 +1,7 @@
 # Publishing an edition
 
+Automatic unreviewed draft publication is available after source testing and setup; see [AUTOMATION.md](AUTOMATION.md). This page covers manual publication and correction.
+
 The app bundles `src/data/today.json` at build time and emits the same content as `edition.json`. Publish a new build for each edition; changing the calendar date does not create new stories. There is only one content file to maintain.
 
 On initial load and when readers return to the tab, the app checks `edition.json` for a valid, newer, already-published edition. It keeps the current stories until the reader selects “Read new edition.” The notice appears on the overview, leaving an open mobile/tablet story uninterrupted. Offline, invalid, same-date, older, or future-dated responses do not replace the active edition.
@@ -25,7 +27,9 @@ npm run build
 
 Preview the three stories on desktop and mobile. Check dates, source destinations, editorial labels, next-story navigation, and the end message. Then commit the content change and push to the configured deployment branch. Confirm the production deployment actually shows the new edition and its `edition.json` matches; a successful push alone is not deployment verification. Also return to a tab running the previous edition and confirm that the update notice offers the new edition without changing its current reading content.
 
-Set a sustainable publication time before promising one to readers. No publication schedule or automatic daily publishing is configured by this change.
+The optional scheduled attempt is 07:17 America/Chicago and can be delayed or skipped. Do not promise a new edition every day: sources and conservative selection may be insufficient. The automation remains disabled until live collection succeeds and the repository variable is enabled.
+
+For a correction to an already published edition, keep its date and increase `revision` (absent means zero). Set `reviewStatus` to `reviewed` only after review. Include each original article's publication date as `source.publishedAt` in YYYY-MM-DD form. A higher revision is offered to existing readers as a correction; it never interrupts their open story.
 
 ## If publication is delayed
 

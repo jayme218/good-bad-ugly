@@ -14,8 +14,10 @@ The following user-approved changes supersede conflicting UI, state, and accepta
 - If the bundled edition is older than today in Chicago, keep it readable with an explicit unavailable-today notice. Future-dated and invalid editions are unavailable.
 - Articles support a named HTTP(S) source link. Missing sources are stated explicitly, and editorial interpretation is labeled Editor's note.
 - The end message describes the three stories offered, not proof of having read them or comprehensive news coverage.
+- Optional revision and review-status metadata distinguish automatically prepared drafts from reviewed editions. Higher revisions on the same date are explicit corrections; revised text has separate saved scroll positions.
+- A free scheduled collector can publish attributed excerpts from approved public sources without prior editorial approval. It must skip publication when three supported distinct-topic stories cannot be selected, and must preserve owner edits. See [AUTOMATION.md](AUTOMATION.md).
 
-Daily publication remains a manual, verified build/deploy process; see [PUBLISHING.md](PUBLISHING.md). No accounts, feeds, archives, or notification system are added.
+Daily publication can be scheduled after live source testing and Pages setup; manual correction remains available. No accounts, feed UI, archives, or external notification system are added.
 
 Feed this document to a coding agent as the source of truth. Do not invent screens, colors, navigation, or extra copy. The reading surface is locked.
 

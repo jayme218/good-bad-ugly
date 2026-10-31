@@ -3,11 +3,13 @@ export function Header({
   iso,
   label,
   stale,
+  reviewStatus,
 }: {
   visible: boolean
   iso: string
   label: string
   stale: boolean
+  reviewStatus?: 'automated' | 'reviewed'
 }) {
   return (
     <header
@@ -28,6 +30,11 @@ export function Header({
       >
         {label}
       </time>
+      {reviewStatus === 'automated' ? (
+        <p className="w-full font-sans text-[0.8125rem] leading-relaxed">
+          Automatically prepared · not yet editor-reviewed
+        </p>
+      ) : null}
       {stale ? (
         <p role="status" className="w-full border-t border-black pt-3 font-sans text-sm leading-relaxed">
           Today's edition isn't available yet. Showing the {label} edition.
