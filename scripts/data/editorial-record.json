@@ -1,0 +1,46 @@
+{
+  "editionDate": "2026-10-31",
+  "revision": 0,
+  "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+  "stories": [
+    {
+      "type": "good",
+      "source": "NASA",
+      "url": "https://science.nasa.gov/get-involved/citizen-science/nasa-selects-19-new-citizen-science-proposals-in-2026/",
+      "sourceTitle": "NASA Selects 19 New Citizen Science Proposals in 2026",
+      "publishedAt": "2026-10-28T16:25:29+00:00",
+      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "supportingPassages": [
+        "So far, 2026 has seen a flood of successes for volunteers who do NASA science, exemplifying NASA’s commitment to gold-standard science—transparent, reproducible and intrinsically collaborative.",
+        "The Backyard Worlds: Planet 9 project announced that their project volunteers have now discovered most of the known brown dwarfs, celestial objects that are similar to planets.",
+        "The Zooniverse platform, with grant from NASA, reached a milestone of 1 billion classifications."
+      ]
+    },
+    {
+      "type": "bad",
+      "source": "U.S. Bureau of Labor Statistics",
+      "url": "https://www.bls.gov/news.release/archives/metro_10282026.htm",
+      "sourceTitle": "Sept. jobless rates down over the year in 226 of 387 metro areas; payroll jobs up in 11",
+      "publishedAt": "2026-10-28T13:21:07.498000+00:00",
+      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "supportingPassages": [
+        "Unemployment rates were lower in September than a year earlier in 226 of the 387 metropolitan areas, higher in 138 areas, and unchanged in 23 areas, the U.S. Bureau of Labor Statistics reported today.",
+        "A total of 48 areas had jobless rates of less than 3.0 percent, and 5 areas had rates of at least 8.0 percent.",
+        "Over the year, employment decreased in Washington-Arlington-Alexandria, DC-VA-MD-WV (-1.8 percent)."
+      ]
+    },
+    {
+      "type": "ugly",
+      "source": "Federal Trade Commission",
+      "url": "https://www.ftc.gov/news-events/news/press-releases/2026/10/ftc-states-take-action-against-toast-inc-over-hidden-unauthorized-fees-deceptive-subscription",
+      "sourceTitle": "FTC and States Take Action Against Toast Inc. over Hidden and Unauthorized Fees, Deceptive Subscription and Cancellation Practices and Other Unlawful Conduct",
+      "publishedAt": "2026-10-29T12:00:00+00:00",
+      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "supportingPassages": [
+        "Toast markets and sells point-of-sale hardware and software and payment processing services to small businesses in the restaurant industry.",
+        "Toast’s cloud-based products and services are used to take and manage orders, accept payments and track inventory, among other related services.",
+        "The FTC and state co-plaintiffs allege Toast deceives customers by imposing various types of fees on the cost of its hardware and software, which Toast fails to clearly disclose to its customers."
+      ]
+    }
+  ]
+}

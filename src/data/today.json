@@ -1,36 +1,53 @@
 {
-  "date": "2026-09-08",
+  "date": "2026-10-31",
   "timezone": "America/Chicago",
+  "revision": 0,
+  "reviewStatus": "automated",
   "items": [
     {
       "type": "good",
-      "headline": "Reefs rebound after heatwave",
+      "headline": "NASA Selects 19 New Citizen…",
       "summaries": [
-        "Surveys find 40% more living coral than last year.",
-        "A Florida spawning method now runs in 11 countries.",
-        "Snapper have returned to reefs barren since 2016."
+        "NASA reports: So far, 2026 has seen a flood of successes for volunteers who do NASA science, exemplifying NASA’s commitment to gold-standard science—transparent, reproducible and intrinsically collaborative.",
+        "NASA reports: The Backyard Worlds: Planet 9 project announced that their project volunteers have now discovered most of the known brown dwarfs, celestial objects that are similar to planets.",
+        "NASA reports: The Zooniverse platform, with grant from NASA, reached a milestone of 1 billion classifications."
       ],
-      "editorNote": "One cooler year does not erase a hotter ocean. It does show restoration works when it is funded like infrastructure, not charity."
+      "editorNote": "Automatically selected and excerpted from NASA. Category assignment is editorial; this draft has not been independently fact-checked.",
+      "source": {
+        "name": "NASA",
+        "url": "https://science.nasa.gov/get-involved/citizen-science/nasa-selects-19-new-citizen-science-proposals-in-2026/",
+        "publishedAt": "2026-10-28"
+      }
     },
     {
       "type": "bad",
-      "headline": "Aquifers hit a historic low",
+      "headline": "Employment declines reported",
       "summaries": [
-        "The Ogallala Aquifer fell another four feet this year.",
-        "Twelve Plains counties have moved to emergency rationing.",
-        "Grain futures jumped 9% as irrigators idle fields."
+        "U.S. Bureau of Labor Statistics reports: Unemployment rates were lower in September than a year earlier in 226 of the 387 metropolitan areas, higher in 138 areas, and unchanged in 23 areas, the U.S. Bureau of Labor Statistics reported today.",
+        "U.S. Bureau of Labor Statistics reports: A total of 48 areas had jobless rates of less than 3.0 percent, and 5 areas had rates of at least 8.0 percent.",
+        "U.S. Bureau of Labor Statistics reports: Over the year, employment decreased in Washington-Arlington-Alexandria, DC-VA-MD-WV (-1.8 percent)."
       ],
-      "editorNote": "This is not a drought story. It is a drawdown story: we have been mining water that does not come back."
+      "editorNote": "Automatically selected and excerpted from U.S. Bureau of Labor Statistics. Category assignment is editorial; this draft has not been independently fact-checked.",
+      "source": {
+        "name": "U.S. Bureau of Labor Statistics",
+        "url": "https://www.bls.gov/news.release/archives/metro_10282026.htm",
+        "publishedAt": "2026-10-28"
+      }
     },
     {
       "type": "ugly",
-      "headline": "Water summit flies private",
+      "headline": "FTC and States Take Action…",
       "summaries": [
-        "Delegates arrived at the security forum on 47 private jets.",
-        "The host city banned lawn watering while banquet fountains ran.",
-        "The closing pledge skipped any cap on groundwater pumping."
+        "Federal Trade Commission reports: Toast markets and sells point-of-sale hardware and software and payment processing services to small businesses in the restaurant industry.",
+        "Federal Trade Commission reports: Toast’s cloud-based products and services are used to take and manage orders, accept payments and track inventory, among other related services.",
+        "Federal Trade Commission reports: The FTC and state co-plaintiffs allege Toast deceives customers by imposing various types of fees on the cost of its hardware and software, which Toast fails to clearly disclose to its customers."
       ],
-      "editorNote": "The people who named the crisis reserved the right to outrun it. The fountains were decorative. The aquifers are not."
+      "editorNote": "Automatically selected and excerpted from Federal Trade Commission. Category assignment is editorial; this draft has not been independently fact-checked.",
+      "source": {
+        "name": "Federal Trade Commission",
+        "url": "https://www.ftc.gov/news-events/news/press-releases/2026/10/ftc-states-take-action-against-toast-inc-over-hidden-unauthorized-fees-deceptive-subscription",
+        "publishedAt": "2026-10-29"
+      }
     }
   ]
 }
