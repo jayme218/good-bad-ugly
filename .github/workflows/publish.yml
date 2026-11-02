@@ -207,7 +207,7 @@ jobs:
 
   deploy:
     needs: build
-    if: needs.build.result == 'success' && needs.build.outputs.current == 'true'
+    if: always() && !cancelled() && needs.build.result == 'success' && needs.build.outputs.current == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
