@@ -1,0 +1,21 @@
+# Owner edition editor
+
+## Intent and selected approach
+The user authorized a review/edit UI, asked us to compare alternatives and choose, then explicitly required that only the owner can change published articles. They also requested a less overused headline font.
+
+Compared A native GitHub JSON edits (minimal but daily editing remains cumbersome), B static form + authenticated GitHub Actions final publication (selected: free, no token setup), C static form + fine-grained token (single-screen save but credentials setup), D OAuth backend (more infrastructure and secrets than this project needs). Choice B is our implementation decision.
+
+## Editing surface
+Serve a separate lazy-loaded editor at #/editor under the current Pages base. No reader navigation changes. Use the established white/black thin-rule system and new Archivo Narrow headings. English product copy. Desktop: story form and readable live preview side by side. Mobile: form/preview tab. Story tabs Good/Bad/Ugly. Inputs: headline (30 UTF-16 units max), exactly three summaries, editor note, source name, HTTPS URL, original date. Edition date is read-only; revision increments automatically. Explicit checkbox marks actually reviewed; default false preserves current review status.
+
+Fetch edition.json as raw text with no-store and SHA-256 hash the original UTF-8 bytes. Require valid current nonfuture edition. Show load/failure/retry states, field-level errors, unsaved-draft state, copy failure fallback and explicit final publishing steps. Preserve text during tab/preview switches and on refresh in localStorage (news draft only). A saved local draft includes original hash/edition and must not silently be transplanted to a different edition. On stale draft, retain export/recovery and require explicit reload-current before new publication.
+
+Prepare a compact JSON envelope {version:1, base:{date,revision,sha256}, edition:<corrected edition>}. Corrected revision equals original revision + 1, same date/timezone, ordered three categories, valid full source, no blank fields. Preserve automated/reviewed unless explicit reviewed selection. Reject no-op edits without status change. Copy envelope; GitHub Actions opens in a separate tab. Clearly instruct paste into correction input and Run workflow. Copy is not publication. No browser tokens or secrets; no automatic remote write from the editor.
+
+## Owner publication
+New workflow correct-edition.yml, workflow_dispatch string input correction. Only github.actor == github.repository_owner is authorized. Explicit failure for any other actor before checkout/publication, even a collaborator. Environment variable passes untrusted JSON to Python, never interpolated into shell source. Checkout latest main, compare envelope base hash/date/revision against actual file before editing. Python validates byte-size <=64KiB, shape, strings, three categories, strict dates, revision+1, HTTPS source/no userinfo, source date <= edition date when present. Write only src/data/today.json, preserving metadata and attribution records. Original extraction audit remains unchanged; commit explains owner correction. Nonforced push and remote HEAD check prevent concurrent main overwrites.
+
+Reuse tested publication pipeline explicitly after bot commit; GITHUB_TOKEN pushes do not trigger a second push workflow. publish.yml gains workflow_call input publish_commit; collect runs only schedule or non-dry manual dispatch, never the correction call; build checks out the supplied commit, still checks latest main, validates and deploys. Workflow permission scopes remain job-specific, public standard Ubuntu, no paid dependency or service. Corrections require DAILY_PUBLISHING_ENABLED=true before committing.
+
+## Verification
+Regression tests exercise invalid input, no-op, source errors, revision/hash conflicts, midnight/new edition, unauthorized actor before publication, Unicode encoding, review status, and unchanged source audit. Frontend core tests use real inputs without external services. Browser checks desktop/mobile editor state and reader typography, empty/invalid/copy states; no actual article edits merely to test. Existing tests/lint/Pages build and production artifacts remain valid. Owner authentication occurs at final GitHub publication, not by hiding the static route.

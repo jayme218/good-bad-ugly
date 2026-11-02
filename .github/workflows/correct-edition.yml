@@ -1,0 +1,113 @@
+name: Publish owner correction
+
+on:
+  workflow_dispatch:
+    inputs:
+      correction:
+        description: Paste the complete correction copied from the edition editor
+        required: true
+        type: string
+
+permissions: {}
+
+# Separate from the reusable publisher's concurrency group to avoid a caller/
+# callee deadlock. Main-branch checks and the edition hash reject any race.
+concurrency:
+  group: owner-edition-correction
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  correct:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    outputs:
+      commit: ${{ steps.publish.outputs.commit }}
+    steps:
+      - name: Authorize only the repository owner on the enabled main branch
+        env:
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ github.repository_owner }}
+          TRIGGERING_ACTOR: ${{ github.triggering_actor }}
+          REF: ${{ github.ref }}
+          ENABLED: ${{ vars.DAILY_PUBLISHING_ENABLED }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$OWNER" || "${ACTOR,,}" != "${OWNER,,}" || "${TRIGGERING_ACTOR,,}" != "${OWNER,,}" ]]; then
+            echo 'Only the repository owner can publish an edition correction.' >&2
+            exit 1
+          fi
+          if [[ "$REF" != 'refs/heads/main' || "$ENABLED" != 'true' ]]; then
+            echo 'Corrections require main and enabled publishing. Nothing was written.' >&2
+            exit 1
+          fi
+      - name: Check out the latest main branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Set up Node
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+      - name: Remember the version before correcting
+        id: start
+        run: echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Test the correction and collection rules before writing
+        run: python3 -m unittest discover -s scripts -p 'test_*.py'
+      - name: Validate the original fingerprint and apply the correction
+        env:
+          # Untrusted JSON is data, never shell source. The validator does not
+          # echo submitted article text in logs or execute any submitted value.
+          CORRECTION_JSON: ${{ inputs.correction }}
+          PUBLISHING_ENABLED: ${{ vars.DAILY_PUBLISHING_ENABLED }}
+        run: python3 scripts/correct_edition.py
+      - name: Verify the corrected edition and app before committing
+        run: |
+          set -euo pipefail
+          npm test
+          npm run lint
+          npm run build -- --base=/good-bad-ugly/
+          cmp src/data/today.json dist/edition.json
+          git diff --check
+      - name: Save only if main is still unchanged
+        id: publish
+        env:
+          START_COMMIT: ${{ steps.start.outputs.commit }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth=1 origin main
+          if [[ "$(git rev-parse origin/main)" != "$START_COMMIT" ]]; then
+            echo 'Main changed during editing. Nothing was committed. Reload the editor against the latest edition.' >&2
+            exit 1
+          fi
+          git add -- src/data/today.json
+          if git diff --cached --quiet; then
+            echo 'No correction was prepared; nothing was committed.' >&2
+            exit 1
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'Publish owner-authorized edition correction' -m 'Owner-authorized correction; original extraction audit is retained unchanged.'
+          git push origin HEAD:main
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo 'Correction saved to GitHub. The deployment job must also succeed before it is live.' >> "$GITHUB_STEP_SUMMARY"
+
+  publish:
+    needs: correct
+    # GITHUB_TOKEN commits do not trigger a push workflow; invoke the existing
+    # tested Pages pipeline explicitly with the exact validated commit.
+    uses: ./.github/workflows/publish.yml
+    with:
+      publish_commit: ${{ needs.correct.outputs.commit }}
+    permissions:
+      contents: write
+      pages: write
+      id-token: write

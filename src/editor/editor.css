@@ -1,0 +1,90 @@
+.editor-page {
+  height: 100dvh;
+  overflow: auto;
+  overscroll-behavior: contain;
+  background: #fff;
+  color: #000;
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.editor-page *, .editor-page *::before, .editor-page *::after { box-sizing: border-box; }
+.editor-page :is(h1, h2, h3, p):not(.editor-preview-article *) { margin: 0; }
+.editor-page h1 { font-family: var(--font-display); font-size: 2.25rem; font-weight: 700; line-height: 1.1; }
+.editor-page h2 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 600; line-height: 1.2; }
+.editor-page h3 { font-size: 1rem; font-weight: 500; }
+.editor-page a { color: inherit; text-underline-offset: 4px; text-decoration: underline; }
+.editor-page :is(a, button, input, textarea, summary):focus-visible { outline: 2px solid #000; outline-offset: 4px; }
+.editor-page :is(input, textarea) { width: 100%; min-width: 0; padding: 0.75rem; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; font: inherit; line-height: 1.5; }
+.editor-page textarea { resize: vertical; min-height: 7.5rem; }
+.editor-page input { min-height: 3rem; }
+.editor-page :is(button, .editor-button) { display: inline-flex; justify-content: center; align-items: center; min-height: 2.75rem; padding: 0.65rem 1rem; border: 1px solid #000; border-radius: 0; background: #fff; color: #000; font: inherit; line-height: 1.35; text-decoration: none; cursor: pointer; }
+.editor-page button:disabled { border-style: dashed; opacity: 0.5; cursor: default; }
+.editor-page .editor-primary, .editor-page [aria-pressed='true'] { background: #000; color: #fff; }
+.editor-page [aria-pressed='true']:focus-visible, .editor-page .editor-primary:focus-visible { outline-offset: 4px; }
+.editor-page input[aria-invalid='true'], .editor-page textarea[aria-invalid='true'] { border-width: 2px; }
+.editor-header { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; max-width: 84rem; margin: auto; padding: 2rem 2.5rem 1.5rem; border-bottom: 1px solid #000; }
+.editor-header p { margin-top: 0.5rem; max-width: 65ch; }
+.editor-header > a { flex-shrink: 0; padding-block: 0.75rem; }
+.editor-main { max-width: 84rem; padding: 1.5rem 2.5rem 3rem; margin: auto; }
+.editor-access { max-width: 78ch; font-size: 0.875rem; }
+.editor-edition { display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; padding-block: 2rem 1.5rem; }
+.editor-edition p { margin-top: 0.5rem; max-width: 65ch; font-size: 0.875rem; }
+.editor-edition button { flex-shrink: 0; }
+.editor-story-tabs { display: flex; border-bottom: 1px solid #000; gap: 0.5rem; padding-bottom: 1rem; }
+.editor-story-tabs button { flex: 1; max-width: 12rem; }
+.editor-tab-error { margin-left: 0.25rem; font-size: 0.75rem; }
+.editor-view-tabs { display: none; }
+.editor-workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 3rem; align-items: start; padding-top: 1.75rem; }
+.editor-form { min-width: 0; padding: 0; margin: 0; border: 0; }
+.editor-section-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+.editor-section-heading a { padding-block: 0.5rem; font-size: 0.875rem; }
+.editor-field { margin-top: 1.25rem; }
+.editor-field > label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; font-weight: 500; }
+.editor-page .editor-hint { margin-top: 0.4rem; font-size: 0.8125rem; line-height: 1.5; max-width: 75ch; }
+.editor-page .editor-error { margin-top: 0.5rem; font-size: 0.875rem; font-weight: 500; }
+.editor-source-fields { border-top: 1px solid #000; padding-top: 1.5rem; margin-top: 2rem; }
+.editor-preview { position: sticky; top: 1.5rem; min-width: 0; }
+.editor-preview-article { margin-top: 1.25rem; border: 1px solid #000; overflow-wrap: anywhere; }
+.editor-preview-article ul { list-style: none; padding-left: 0; }
+.editor-preview-article h2 { font-size: 1.85rem; font-weight: 700; }
+.editor-publish { margin-top: 3rem; border-top: 1px solid #000; padding-top: 2rem; }
+.editor-storage { margin-top: 0.5rem !important; font-size: 0.875rem; }
+.editor-review { display: flex; align-items: flex-start; gap: 0.75rem; max-width: 75ch; margin-top: 1.5rem; cursor: pointer; }
+.editor-page .editor-review input { width: 1.25rem; height: 1.25rem; min-height: 0; margin-top: 0.15rem; padding: 0; flex-shrink: 0; accent-color: #000; }
+.editor-steps { padding-left: 1.4rem; margin: 1.5rem 0; max-width: 75ch; }
+.editor-steps li + li { margin-top: 0.4rem; }
+.editor-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+.editor-copy-status { max-width: 75ch; margin-top: 1rem !important; }
+.editor-copy-fallback { max-width: 65rem; margin-block: 1.5rem; }
+.editor-copy-fallback summary { padding-block: 0.75rem; cursor: pointer; }
+.editor-copy-fallback label { display: block; margin-bottom: 0.5rem; font-size: 0.875rem; }
+.editor-copy-fallback textarea { min-height: 9rem; font-family: ui-monospace, monospace; font-size: 0.875rem; overflow-wrap: anywhere; }
+.editor-copy-fallback button { margin-top: 0.75rem; }
+.editor-notice { margin-block: 1.5rem; padding: 1.25rem; border: 1px solid #000; max-width: 75ch; }
+.editor-notice p { margin-top: 0.75rem; }
+.editor-notice button { margin-top: 1rem; }
+.editor-load { padding-block: 3rem; }
+.editor-load p, .editor-load button { margin-top: 1rem; }
+@media (hover: hover) {
+  .editor-page :is(button, .editor-button):not(:disabled):hover { background: #000; color: #fff; }
+  .editor-page .editor-primary:not(:disabled):hover, .editor-page [aria-pressed='true']:hover { background: #fff; color: #000; }
+}
+@media (max-width: 767px) {
+  .editor-header { padding: 1.5rem 1rem; align-items: flex-start; flex-direction: column; gap: 0.75rem; }
+  .editor-header h1 { font-size: 2rem; }
+  .editor-main { padding: 1.25rem 1rem 2rem; }
+  .editor-edition { flex-direction: column; gap: 1rem; padding-top: 1.5rem; }
+  .editor-story-tabs { gap: 0.375rem; }
+  .editor-story-tabs button { max-width: none; padding-inline: 0.4rem; font-size: 0.875rem; flex-wrap: wrap; }
+  .editor-tab-error { flex-basis: 100%; margin: 0; }
+  .editor-view-tabs { display: flex; gap: 0.5rem; padding-top: 1rem; }
+  .editor-view-tabs button { flex: 1; font-size: 0.875rem; }
+  .editor-workspace { display: block; padding-top: 1.5rem; }
+  .editor-view-edit .editor-preview, .editor-view-preview .editor-form { display: none; }
+  .editor-preview { position: static; }
+  .editor-publish { margin-top: 2rem; }
+  .editor-actions { flex-direction: column; }
+  .editor-actions > * { width: 100%; }
+}

@@ -38,6 +38,10 @@ Without `DAILY_PUBLISHING_ENABLED=true`, the manual dry run is available but aut
 
 ## Edit after publication
 
+Use the [owner edition editor](https://jayme218.github.io/good-bad-ugly/#/editor) for form-based corrections and reader preview. Copy the correction, open the GitHub publisher, and run it as the repository owner. The correction workflow validates the original fingerprint and explicitly reuses the Pages pipeline after its bot commit. See [PUBLISHING.md](PUBLISHING.md) for the exact steps. Copying a correction alone does not publish it.
+
+Direct file editing remains available:
+
 Open `src/data/today.json` in GitHub and edit the text or source. Keep the edition's original `date` and `timezone`, increase `revision` by one, and set `reviewStatus` to `reviewed` when the edition has actually been reviewed. For example, change revision 0 to 1. Keep headlines within 30 characters and exactly three summary bullets per story.
 
 Commit the edit to `main`. The enabled workflow validates and deploys the corrected version. Readers already in the app are offered an updated edition on return; the current article is not silently replaced. Higher revisions have separate scroll positions while opened state stays attached to the edition date.

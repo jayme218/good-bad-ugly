@@ -13,10 +13,10 @@ export function StoryBody({ item, fillHeight = true }: { item: NewsItem; fillHei
 
   return (
     <div className={`story-in flex ${fillHeight ? 'min-h-full' : ''} min-w-0 flex-col break-words px-[clamp(0.75rem,2vw,1.5rem)] py-[clamp(0.9rem,2.2vh,1.5rem)]`}>
-      <p className="mb-[clamp(0.55rem,1.4vh,0.9rem)] font-serif text-[clamp(1rem,1.8vh,1.2rem)] italic leading-none">
+      <p className="mb-[clamp(0.55rem,1.4vh,0.9rem)] font-display text-[clamp(1rem,1.8vh,1.2rem)] font-semibold leading-none">
         {label}
       </p>
-      <h2 className="font-serif text-[clamp(1.35rem,3.2vh,1.85rem)] leading-[1.15] tracking-[-0.02em]">
+      <h2 className="font-display text-[clamp(1.35rem,3.2vh,1.85rem)] font-bold leading-[1.15] tracking-[-0.01em]">
         {item.headline}
       </h2>
       <ul className="mt-[clamp(0.75rem,1.8vh,1.15rem)] mb-5 flex flex-col gap-[clamp(0.4rem,1.2vh,0.7rem)] font-sans text-[clamp(1rem,1.7vh,1.05rem)] leading-[1.5]">
@@ -81,7 +81,7 @@ export function NewsCard({ item, open, filled, isMobile, onOpen }: NewsCardProps
         className={`${boxClass} story-box items-center justify-center appearance-none px-2 py-4 cursor-pointer`}
         data-filled={filled ? 'true' : 'false'}
       >
-        <span className="font-serif text-[clamp(1.1rem,2.5vw,2rem)] leading-tight text-center">
+        <span className="font-display text-[clamp(1.1rem,2.5vw,2rem)] font-semibold leading-tight text-center">
           {label}
         </span>
         <span

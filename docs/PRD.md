@@ -17,7 +17,7 @@ The following user-approved changes supersede conflicting UI, state, and accepta
 - Optional revision and review-status metadata distinguish automatically prepared drafts from reviewed editions. Higher revisions on the same date are explicit corrections; revised text has separate saved scroll positions.
 - A free scheduled collector can publish attributed excerpts from approved public sources without prior editorial approval. It must skip publication when three supported distinct-topic stories cannot be selected, and must preserve owner edits. See [AUTOMATION.md](AUTOMATION.md).
 
-Daily publication can be scheduled after live source testing and Pages setup; manual correction remains available. No accounts, feed UI, archives, or external notification system are added.
+Daily publication can be scheduled after live source testing and Pages setup; manual correction remains available. No reader accounts, feed UI, archives, or external notification system are added. The separate owner editor at `#/editor` prepares corrections with a preview; GitHub authenticates the repository owner before publication. This operator surface does not add navigation or controls to the reader. See [PUBLISHING.md](PUBLISHING.md).
 
 Feed this document to a coding agent as the source of truth. Do not invent screens, colors, navigation, or extra copy. The reading surface is locked.
 
@@ -116,7 +116,7 @@ Keep the existing app. Do not migrate.
 |--------|--------|
 | UI | React 19 + Vite + TypeScript |
 | Style | Tailwind CSS v4, black `#000` / white `#fff` only |
-| Type | Instrument Serif (headlines/labels), Instrument Sans (body) |
+| Type | Archivo Narrow 600/700 (headlines/labels), Instrument Sans (body) |
 | Data | Static JSON in the repo (or `/public`); no Supabase, no auth, no CMS |
 | Hosting | Vercel static (Vite `build` output) |
 | Time | `America/Chicago` via `Intl.DateTimeFormat` |

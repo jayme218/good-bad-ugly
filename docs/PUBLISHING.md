@@ -2,9 +2,23 @@
 
 Automatic unreviewed draft publication is available after source testing and setup; see [AUTOMATION.md](AUTOMATION.md). This page covers manual publication and correction.
 
+## Owner edition editor
+
+Open [the edition editor](https://jayme218.github.io/good-bad-ugly/#/editor). Edit the headline, three summaries, note or original source in the form, and check the reader preview. The edition date stays fixed and the correction revision is increased automatically. Tick the review checkbox only after checking all three stories and sources. Drafts are saved locally on the device; download a backup before discarding an old draft.
+
+1. Select **Copy correction**. This prepares a correction and checks that the published original has not changed. It does not publish.
+2. Select **Open GitHub publisher**, sign in as `jayme218`, and choose **Run workflow** on `main`.
+3. Paste the copied correction into the **correction** field and run it.
+4. Wait for **Publish owner correction** and its reused Pages deployment to succeed. Check the live edition before considering publication complete.
+
+The editor route is public, but it contains no write credentials. Only the repository owner can run a successful correction publication; both the initial actor and a rerun actor are checked. Other users can prepare local text but cannot change the live articles. No browser token, login service or paid backend is required.
+
+The publisher compares the exact original file fingerprint, date and revision before writing. A changed original or concurrent owner push rejects the correction. Keep your draft backup, load the latest edition and reapply the relevant changes. The collector’s original extraction audit remains unchanged; the correction commit records owner authorization.
+
+
 The app bundles `src/data/today.json` at build time and emits the same content as `edition.json`. Publish a new build for each edition; changing the calendar date does not create new stories. There is only one content file to maintain.
 
-On initial load and when readers return to the tab, the app checks `edition.json` for a valid, newer, already-published edition. It keeps the current stories until the reader selects “Read new edition.” The notice appears on the overview, leaving an open mobile/tablet story uninterrupted. Offline, invalid, same-date, older, or future-dated responses do not replace the active edition.
+On initial load and when readers return to the tab, the app checks `edition.json` for a valid, newer, already-published edition. It keeps the current stories until the reader selects “Read new edition.” The notice appears on the overview, leaving an open mobile/tablet story uninterrupted. Offline, invalid, equal/lower revisions, older, or future-dated responses do not replace the active edition.
 
 ## Prepare
 

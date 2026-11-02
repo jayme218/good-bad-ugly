@@ -17,7 +17,7 @@ export function Header({
       aria-hidden={!visible}
     >
       <div className="min-w-0">
-        <h1 className="font-serif text-[clamp(1.05rem,2.2vw,1.55rem)] leading-tight tracking-[-0.02em] text-pretty">
+        <h1 className="font-display text-[clamp(1.05rem,2.2vw,1.55rem)] font-semibold leading-tight text-pretty">
           The Good, The Bad, and The Ugly
         </h1>
         <p className="mt-1 font-sans text-[0.8125rem] leading-relaxed">

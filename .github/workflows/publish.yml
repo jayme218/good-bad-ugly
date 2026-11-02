@@ -1,6 +1,12 @@
 name: Daily edition and Pages
 
 on:
+  workflow_call:
+    inputs:
+      publish_commit:
+        description: Validated owner correction commit to deploy without collecting
+        required: true
+        type: string
   push:
     branches: [main]
   schedule:
@@ -58,8 +64,8 @@ jobs:
   collect:
     if: >-
       vars.DAILY_PUBLISHING_ENABLED == 'true' && github.ref == 'refs/heads/main' &&
-      github.event_name != 'push' &&
-      (github.event_name != 'workflow_dispatch' || !inputs.dry_run)
+      !inputs.publish_commit &&
+      (github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run))
     runs-on: ubuntu-latest
     timeout-minutes: 20
     permissions:
@@ -141,7 +147,7 @@ jobs:
     needs: collect
     if: >-
       always() && vars.DAILY_PUBLISHING_ENABLED == 'true' && github.ref == 'refs/heads/main' &&
-      (github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
+      (inputs.publish_commit != '' || github.event_name != 'workflow_dispatch' || !inputs.dry_run) &&
       (needs.collect.result == 'success' || needs.collect.result == 'skipped')
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -151,10 +157,19 @@ jobs:
     outputs:
       current: ${{ steps.current.outputs.current }}
     steps:
+      - name: Validate the supplied correction commit
+        if: inputs.publish_commit != ''
+        env:
+          PUBLISH_COMMIT: ${{ inputs.publish_commit }}
+        run: |
+          if [[ ! "$PUBLISH_COMMIT" =~ ^[a-f0-9]{40}$ ]]; then
+            echo 'A correction deployment requires an exact lowercase 40-character commit SHA.' >&2
+            exit 1
+          fi
       - name: Check out the content that will be deployed
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ needs.collect.outputs.commit || github.sha }}
+          ref: ${{ needs.collect.outputs.commit || inputs.publish_commit || github.sha }}
           fetch-depth: 1
       - name: Set up Node
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6

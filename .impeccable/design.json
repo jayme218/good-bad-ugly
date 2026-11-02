@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T04:22:28.237207+00:00",
+  "title": "Design System: The Good, The Bad, and The Ugly",
+  "extensions": {
+    "colorMeta": {
+      "black": {
+        "role": "neutral",
+        "displayName": "Black",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      },
+      "white": {
+        "role": "neutral",
+        "displayName": "White",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(26% 0 0)",
+          "oklch(38% 0 0)",
+          "oklch(49% 0 0)",
+          "oklch(61% 0 0)",
+          "oklch(72% 0 0)",
+          "oklch(84% 0 0)",
+          "oklch(95% 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Card category",
+        "purpose": "Closed reader cards."
+      },
+      "headline": {
+        "displayName": "Story headline",
+        "purpose": "Reader article titles; editor preview overrides size and line-height."
+      },
+      "title": {
+        "displayName": "Section heading",
+        "purpose": "Owner editor sections."
+      }
+    },
+    "shadows": [
+      {
+        "name": "card-focus-ring",
+        "value": "inset 0 0 0 3px #fff, inset 0 0 0 5px #000",
+        "purpose": "Keyboard focus only; paired with an external black outline."
+      }
+    ],
+    "motion": [
+      {
+        "name": "story-in",
+        "value": "280ms ease-out",
+        "purpose": "Opacity 0 to 1; disabled under prefers-reduced-motion: reduce."
+      },
+      {
+        "name": "chrome-in",
+        "value": "400ms ease-out",
+        "purpose": "Opacity 0 to 1; disabled under prefers-reduced-motion: reduce."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "card-gap-wide",
+        "value": "768px"
+      },
+      {
+        "name": "editor-small-max",
+        "value": "767px"
+      },
+      {
+        "name": "reader-dialog-max",
+        "value": "1023px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Outline button",
+      "kind": "button",
+      "refersTo": "button-outline",
+      "description": "Plain editor action with monochrome hover inversion.",
+      "html": "<button class=\"ds-outline\">Download draft backup</button>",
+      "css": ".ds-outline{font-family:var(--font-sans, \"Instrument Sans\", ui-sans-serif, system-ui, sans-serif);font-size:1rem;line-height:1.35;min-height:2.75rem;padding:.65rem 1rem;border:1px solid #000;border-radius:0;cursor:pointer;background:#fff;color:#000}.ds-outline:focus-visible{outline:2px solid #000;outline-offset:4px;}.ds-outline:disabled{border-style:dashed;opacity:.5;cursor:default}@media(hover:hover){.ds-outline:not(:disabled):hover{background:#000;color:#fff}}"
+    },
+    {
+      "name": "Primary button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Plain editor action with monochrome hover inversion.",
+      "html": "<button class=\"ds-primary\">Copy correction</button>",
+      "css": ".ds-primary{font-family:var(--font-sans, \"Instrument Sans\", ui-sans-serif, system-ui, sans-serif);font-size:1rem;line-height:1.35;min-height:2.75rem;padding:.65rem 1rem;border:1px solid #000;border-radius:0;cursor:pointer;background:#000;color:#fff}.ds-primary:focus-visible{outline:2px solid #000;outline-offset:4px;}.ds-primary:disabled{border-style:dashed;opacity:.5;cursor:default}@media(hover:hover){.ds-primary:not(:disabled):hover{background:#fff;color:#000}}"
+    },
+    {
+      "name": "Labeled field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Editor label and full-width text field.",
+      "html": "<label class=\"ds-label\" for=\"ds-headline\">Headline</label><input class=\"ds-field\" id=\"ds-headline\" value=\"Today\u2019s headline\">",
+      "css": ".ds-label{display:block;font-family:var(--font-sans,\"Instrument Sans\",sans-serif);font-size:.875rem;font-weight:500;margin-bottom:.5rem}.ds-field{width:100%;min-width:0;min-height:3rem;padding:.75rem;border:1px solid #000;border-radius:0;background:#fff;color:#000;font-family:var(--font-sans,\"Instrument Sans\",sans-serif);font-size:1rem;line-height:1.5}.ds-field:focus-visible{outline:2px solid #000;outline-offset:4px;}.ds-field[aria-invalid=true]{border-width:2px}"
+    },
+    {
+      "name": "Story selectors",
+      "kind": "nav",
+      "description": "Three outlined editor controls; selected story is inverted.",
+      "html": "<div class=\"ds-tabs\" role=\"group\" aria-label=\"Choose a story\"><button aria-pressed=\"true\">The Good</button><button aria-pressed=\"false\">The Bad</button><button aria-pressed=\"false\">The Ugly</button></div>",
+      "css": ".ds-tabs{display:flex;gap:.5rem;padding-bottom:1rem;border-bottom:1px solid #000}.ds-tabs button{font-family:var(--font-sans, \"Instrument Sans\", ui-sans-serif, system-ui, sans-serif);font-size:1rem;line-height:1.35;min-height:2.75rem;padding:.65rem 1rem;border:1px solid #000;border-radius:0;cursor:pointer;flex:1;max-width:12rem;background:#fff;color:#000}.ds-tabs button[aria-pressed=true]{background:#000;color:#fff}.ds-tabs button:focus-visible{outline:2px solid #000;outline-offset:4px;}@media(hover:hover){.ds-tabs button:hover{background:#000;color:#fff}.ds-tabs button[aria-pressed=true]:hover{background:#fff;color:#000}}"
+    },
+    {
+      "name": "Closed story card",
+      "kind": "card",
+      "refersTo": "story-card",
+      "description": "Reader category trigger; fill marks opened state on mobile.",
+      "html": "<button class=\"ds-story\" data-filled=\"false\"><span>The Good</span></button>",
+      "css": ".ds-story{display:flex;align-items:center;justify-content:center;width:100%;height:100%;min-height:0;padding:1rem .5rem;border:1px solid #000;border-radius:0;background:#fff;color:#000;cursor:pointer}.ds-story span{font-family:var(--font-display,\"Archivo Narrow\",\"Arial Narrow\",sans-serif);font-size:clamp(1.1rem,2.5vw,2rem);font-weight:600;line-height:1.25}.ds-story[data-filled=true]{background:#000;color:#fff}.ds-story:focus-visible{outline:2px solid #000;outline-offset:3px;box-shadow:inset 0 0 0 3px #fff,inset 0 0 0 5px #000}@media(hover:hover){.ds-story:hover{background:#000;color:#fff}}"
+    },
+    {
+      "name": "Editor\u2019s note",
+      "kind": "custom",
+      "description": "Reader note separated with a single left rule.",
+      "html": "<section class=\"ds-note\" aria-label=\"Editor\u2019s note\"><h3>Editor\u2019s note</h3><p>A short editorial observation follows the attributed reporting.</p></section>",
+      "css": ".ds-note{margin-top:1.5rem;border-left:1px solid #000;padding-left:.75rem;background:#fff;color:#000;font-family:var(--font-sans,\"Instrument Sans\",sans-serif);font-size:clamp(.875rem,1.55vh,.95rem);line-height:1.5}.ds-note h3{font-size:.8125rem;font-weight:400;margin:0 0 .5rem}.ds-note p{margin:0}"
+    }
+  ],
+  "narrative": {
+    "northStar": "A finite daily reading ritual",
+    "overview": "A finite daily reading ritual. White surfaces, black type, and thin outlines keep the three stories distinct without adding decorative chrome. Condensed headings establish hierarchy while the body face carries summaries, sources, notes, and controls.\n\nThe owner editor inherits this same plain visual language: outlined fields, explicit labels, and a reader preview. Its denser working layout changes with available width while preserving the reader\u2019s typography and monochrome materials.",
+    "keyCharacteristics": [
+      "Monochrome surfaces and thin outlines.",
+      "Archivo Narrow headings with Instrument Sans reading and control text.",
+      "Square corners and flat surfaces.",
+      "State conveyed through inversion, borders, and plain text."
+    ],
+    "rules": [
+      {
+        "name": "The Monochrome Rule",
+        "body": "Use black and white for surfaces, text, borders, and interaction states.",
+        "section": "colors"
+      },
+      {
+        "name": "The Heading Pair Rule",
+        "body": "Use Archivo Narrow for reader and editor headings; use Instrument Sans for body text and controls.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Surface Rule",
+        "body": "Separate content with borders and space; reserve the existing inset ring for keyboard focus.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do preserve black-and-white inversion for selected editor controls and opened mobile cards.",
+      "Do retain readable source links, editor notes, and explicit form labels.",
+      "Do preserve the independent reader and editor responsive thresholds.",
+      "Do respect reduced-motion preferences for reader fades."
+    ],
+    "donts": [
+      "Don't introduce accent colors into the monochrome identity.",
+      "Don't replace the heading face with the superseded Instrument Serif.",
+      "Don't add decorative shadows or rounded containers to these flat, square surfaces."
+    ]
+  }
+}
