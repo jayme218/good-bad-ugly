@@ -15,6 +15,24 @@ class CollectorTests(unittest.TestCase):
             with self.subTest(bad=bad): self.assertFalse(news.allowed_url(bad, SPEC))
         self.assertTrue(news.allowed_url('https://science.nasa.gov/a', SPEC))
 
+    def test_fetch_negotiates_a_text_xml_only_feed_without_weakening_xml_validation(self):
+        url = 'https://www.nasa.gov/feed/'
+        xml = Path(__file__).with_name('fixtures').joinpath('news.xml').read_bytes()
+        with patch.object(news.urllib.request,'build_opener') as opener:
+            context = opener.return_value.open.return_value
+            response = context.__enter__.return_value
+            response.geturl.return_value = url
+            response.read.return_value = xml
+            def negotiate(request, timeout):
+                accepted = {value.split(';',1)[0].strip() for value in request.get_header('Accept','').split(',')}
+                if 'text/xml' not in accepted:
+                    raise news.urllib.error.HTTPError(url,406,'Not Acceptable',None,None)
+                return context
+            opener.return_value.open.side_effect = negotiate
+            data = news.fetch(url,SPEC)
+        self.assertEqual(len(news.parse_feed(data,SPEC,NOW)),1)
+        with self.assertRaises(ValueError): news.parse_feed(b'<html>Not a news feed</html>',SPEC,NOW)
+
     def test_feed_fixture(self):
         entries = news.parse_feed(Path(__file__).with_name('fixtures').joinpath('news.xml').read_bytes(), SPEC, NOW)
         self.assertEqual(len(entries), 1)
@@ -247,5 +265,163 @@ class CollectorTests(unittest.TestCase):
                 result=news.run(root,NOW,write=True)
             self.assertEqual(result['status'],'skipped')
             self.assertEqual(json.loads(target.read_text()),original)
+
+    def test_nsf_body_keeps_uncertainty_and_does_not_split_a_name_initial(self):
+        first = 'NSF–DOE Vera C. Rubin Observatory has found a large object that scientists have identified as a possible dwarf planet.'
+        second = 'A preliminary data analysis shows that the object may be one of the largest dwarf planet candidates ever found.'
+        third = 'If confirmed, the object would join the five other known dwarf planets in the solar system.'
+        page = '<main><article><p>Related news should not supply the selected article paragraphs.</p></article><div class="clearfix text-formatted field field-news-body"><p>' + ' '.join([first, second, third]) + '</p></div></main>'
+        lines = news.excerpts(news.article_body(page.encode()))
+        self.assertEqual(lines, [first, second, third])
+
+    def test_pce_price_increase_requires_an_affirmative_reported_change(self):
+        spec = {'categories':['bad']}
+        for sentence in ['From the preceding month, the PCE price index for September increased 0.5 percent.',
+                         'The PCE price index increased 0.5 percent from the previous month.']:
+            self.assertEqual(news.category({'title':'Personal Income and Outlays', 'body':sentence}, spec), 'bad')
+            self.assertEqual(news.bad_headline([sentence]), 'PCE price increases reported')
+        for sentence in ['The stock price index for September increased 0.5 percent.',
+                         'The PCE price index for September decreased 0.5 percent.',
+                         'The PCE price index was unchanged during September.',
+                         'The PCE price index is expected to increase next month.']:
+            self.assertIsNone(news.category({'title':'Personal Income and Outlays', 'body':sentence}, spec))
+
+    def test_reprint_notice_outside_the_body_cannot_be_bypassed_with_full_feed_text(self):
+        body = '<p>Researchers discovered a possible new dwarf planet in the outer solar system. Preliminary observations indicate that it may have a very distant orbit. If confirmed, the discovery would add another dwarf planet to the known solar system.</p>'
+        entry = {'title':'Scientists discover possible dwarf planet','url':'https://www.nsf.gov/news/release','published':NOW,'body':body}
+        spec = {**SPEC,'id':'nsf','name':'NSF','hosts':['www.nsf.gov'],'feeds':['https://www.nsf.gov/rss/news.xml'],
+                'requireArticleBody':True,'rejectThirdPartyReprints':True}
+        notice = '<section><h2>This article was originally published by Rubin Observatory. It has been edited for length and style.</h2></section>'
+        page = ('<main><div class="field-news-body">'+body+'</div>'+notice+'</main>').encode()
+        with patch.object(news,'parse_feed',return_value=[entry]), patch.object(news,'fetch',side_effect=[b'<rss/>',page]) as fetch:
+            candidates,reports = news.collect([spec],NOW,set())
+        self.assertEqual(fetch.call_count,2)
+        self.assertEqual(candidates,[])
+        self.assertIn('third-party reprinted',reports[0]['reason'])
+        own_page = ('<main><div class="field-news-body">'+body+'</div></main>').encode()
+        with patch.object(news,'parse_feed',return_value=[entry]), patch.object(news,'fetch',side_effect=[b'<rss/>',own_page]) as fetch:
+            candidates,reports = news.collect([spec],NOW,set())
+        self.assertEqual(fetch.call_count,2)
+        self.assertEqual(reports,[])
+        self.assertEqual(len(candidates),1)
+
+    def test_new_source_paths_do_not_relax_host_or_date_validation(self):
+        spec = {**SPEC, 'hosts':['www.justice.gov'], 'articlePathPrefixes':['/opa/pr/']}
+        def feed(url, date='Thu, 29 Oct 2026 18:00:00 +0000'):
+            return f'<rss><channel><item><title>Agency Charges Fraud</title><link>{url}</link><pubDate>{date}</pubDate><description>A description.</description></item></channel></rss>'.encode()
+        self.assertEqual(len(news.parse_feed(feed('https://www.justice.gov/opa/pr/agency-case'),spec,NOW)),1)
+        for url in ['https://www.justice.gov/video/fraud', 'https://www.justice.gov/opa/pr-other/fraud',
+                    'https://www.justice.gov.evil.test/opa/pr/fraud', 'http://www.justice.gov/opa/pr/fraud']:
+            with self.subTest(url=url): self.assertEqual(news.parse_feed(feed(url),spec,NOW),[])
+        self.assertEqual(news.parse_feed(feed('https://www.justice.gov/opa/pr/fraud','Sat, 31 Oct 2026 18:00:00 +0000'),spec,NOW),[])
+        self.assertEqual(news.parse_feed(feed('https://www.justice.gov/opa/pr/fraud','Thu, 01 Oct 2026 18:00:00 +0000'),spec,NOW),[])
+
+    def test_legacy_http_feed_links_upgrade_only_on_the_explicit_allowed_source(self):
+        spec = {'id':'fda','hosts':['www.fda.gov'],'categories':['good'],'upgradeHttpLinks':True,
+                'articlePathPrefixes':['/news-events/press-announcements/']}
+        def feed(url):
+            return f'<rss><channel><item><title>FDA Approves New Treatment</title><link>{url}</link><pubDate>Thu, 29 Oct 2026 18:00:00 +0000</pubDate><description>A feed teaser.</description></item></channel></rss>'.encode()
+        path = '/news-events/press-announcements/new-treatment'
+        for authority in ['www.fda.gov','www.fda.gov:80']:
+            entries = news.parse_feed(feed('http://'+authority+path),spec,NOW)
+            self.assertEqual(entries[0]['url'],'https://www.fda.gov'+path)
+        for url in ['http://evil.test'+path,'http://www.fda.gov.evil.test'+path,
+                    'http://name@www.fda.gov'+path,'http://@www.fda.gov'+path,
+                    'http://www.fda.gov:443'+path,'http://www.fda.gov:8080'+path,
+                    'http://www.fda.gov/food/third-party-recall']:
+            with self.subTest(url=url): self.assertEqual(news.parse_feed(feed(url),spec,NOW),[])
+        self.assertEqual(news.parse_feed(feed('http://www.fda.gov'+path),{**spec,'upgradeHttpLinks':False},NOW),[])
+        self.assertFalse(news.allowed_url('http://www.fda.gov'+path,spec))
+
+    def test_article_redirects_and_final_urls_must_remain_in_the_source_article_scope(self):
+        spec = {'hosts':['www.fda.gov'],'articlePathPrefixes':['/news-events/press-announcements/']}
+        article_spec = {**spec,'_articleRequest':True}
+        source = 'https://www.fda.gov/news-events/press-announcements/release'
+        request = news.urllib.request.Request(source)
+        redirect = news.SafeRedirect(article_spec)
+        with self.assertRaises(ValueError):
+            redirect.redirect_request(request,None,302,'',{},'https://www.fda.gov/safety/recalls/firm-announcement')
+        follow = redirect.redirect_request(request,None,302,'',{},source+'-canonical')
+        self.assertEqual(follow.full_url,source+'-canonical')
+        self.assertTrue(news.allowed_url('https://www.fda.gov/about-fda/press/rss.xml',spec))
+        self.assertFalse(news.allowed_url('https://www.fda.gov/about-fda/press/rss.xml',article_spec))
+        with patch.object(news.urllib.request,'build_opener') as opener:
+            response=opener.return_value.open.return_value.__enter__.return_value
+            response.geturl.return_value='https://www.fda.gov/safety/recalls/firm-announcement'
+            with self.assertRaises(ValueError): news.fetch(source,article_spec)
+
+    def test_fda_good_requires_an_affirmative_approval_title(self):
+        spec = {'id':'fda','categories':['good']}
+        self.assertEqual(news.category({'title':'FDA Approves First Treatment for a Rare Disease','body':'An official approval.'},spec),'good')
+        for title in ['FDA Withdraws Approval of a Treatment','FDA Revokes Approval of a Treatment',
+                      'FDA Approves Withdrawal of a Dangerous Product','FDA Considers a Potential Approval',
+                      'FDA Announces Review of a New Treatment']:
+            with self.subTest(title=title): self.assertIsNone(news.category({'title':title,'body':'An agency announcement.'},spec))
+        self.assertIsNone(news.category({'title':'FDA Approves New Treatment','body':'An agency announcement.'},{'id':'other','categories':['good']}))
+
+    def test_professional_degrees_do_not_cut_attribution_or_approval_limitations(self):
+        first = 'The agency granted accelerated approval for a therapy that may reduce the frequency of surgical procedures.'
+        second = 'Director Karim Mikhail, B. Pharm., M.S. explained that approval relies on an intermediate clinical endpoint.'
+        third = 'The manufacturer must conduct post-approval clinical trials to verify and describe the clinical benefit.'
+        self.assertEqual(news.excerpts('<p>'+' '.join([first,second,third])+'</p>'),[first,second,third])
+
+    def fallback_specs_and_responses(self):
+        definitions = [('nasa','www.nasa.gov','good','science','/news/'),
+                       ('bls','www.bls.gov','bad','economy','/news/'),
+                       ('ftc','www.ftc.gov','ugly','consumer','/news/'),
+                       ('nsf','www.nsf.gov','good','science','/news/'),
+                       ('fda','www.fda.gov','good','health','/news-events/press-announcements/'),
+                       ('bea','www.bea.gov','bad','economy','/news/'),
+                       ('doj','www.justice.gov','ugly','justice','/opa/pr/')]
+        specs = [{'id':key,'name':key.upper(),'hosts':[host],'feeds':[f'https://{host}/feed.xml'],
+                  'categories':[kind],'family':family,'articlePathPrefixes':[prefix]}
+                 for key,host,kind,family,prefix in definitions]
+        for spec in specs[3:5]:
+            spec.update(requireArticleBody=True,rejectThirdPartyReprints=True)
+        specs[4]['upgradeHttpLinks'] = True
+        titles = {'nsf':'Scientists discover possible dwarf planet', 'fda':'FDA Approves New Treatment', 'bea':'Personal Income and Outlays', 'doj':'Doctor Sentenced for Medicare Fraud'}
+        bodies = {'nsf':'<div class="field-news-body"><p>NSF–DOE Vera C. Rubin Observatory has found a possible dwarf planet beyond Pluto. Preliminary observations indicate that the object may have a very distant orbit. If confirmed, the discovery would add another dwarf planet to the known solar system.</p></div><section>This article was originally published by another organization.</section>',
+                  'fda':'<article><p>The FDA granted accelerated approval for a treatment for adults with a rare disease. The approval relies on an intermediate endpoint reasonably likely to predict clinical benefit. The manufacturer must conduct additional clinical trials to verify the clinical benefit.</p></article>',
+                  'bea':'<article><p>Personal income increased during September according to the latest estimates. Consumer spending also increased from the previous month in the national estimates. From the preceding month, the PCE price index for September increased 0.5 percent.</p></article>',
+                  'doj':'<article><p>A federal court sentenced a doctor after the jury found him guilty of Medicare fraud. According to court documents, the defendant submitted fraudulent claims for treatment. The sentence follows a trial where the government presented evidence of the scheme.</p></article>'}
+        responses = {}
+        for spec in specs[3:]:
+            key = spec['id']; url = f"https://{spec['hosts'][0]}{spec['articlePathPrefixes'][0]}release"
+            feed_url = url.replace('https:', 'http:') if key == 'fda' else url
+            responses[spec['feeds'][0]] = f'<rss><channel><item><title>{titles[key]}</title><link>{feed_url}</link><pubDate>Thu, 29 Oct 2026 18:00:00 +0000</pubDate><description>A short feed teaser.</description></item></channel></rss>'.encode()
+            responses[url] = bodies[key].encode()
+        return specs, responses
+
+    def test_all_three_original_publishers_can_fail_without_losing_the_edition(self):
+        specs,responses=self.fallback_specs_and_responses()
+        def fetch(url, spec):
+            if url not in responses: raise OSError('Original publisher unavailable')
+            return responses[url]
+        with patch.object(news,'fetch',side_effect=fetch):
+            candidates,reports=news.collect(specs,NOW,set())
+        self.assertEqual({candidate['sourceId'] for candidate in candidates},{'fda','bea','doj'})
+        self.assertEqual(len(reports),4)
+        self.assertTrue(any('third-party reprinted' in report['reason'] for report in reports))
+        selected=news.select_edition(candidates,set(),NOW)
+        self.assertIsNotNone(selected)
+        news.validate_generated_edition(selected[0])
+        self.assertEqual([item['source']['name'] for item in selected[0]['items']],['FDA','BEA','DOJ'])
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'scripts').mkdir();(root/'scripts/news_sources.json').write_text(json.dumps(specs))
+            with patch.object(news,'fetch',side_effect=fetch): result=news.run(root,NOW)
+            self.assertEqual(result['sourceCandidates'],{'nasa':0,'bls':0,'ftc':0,'nsf':0,'fda':1,'bea':1,'doj':1})
+
+    def test_all_fallbacks_failing_keeps_published_bytes_and_reports_zero_candidates(self):
+        specs,_=self.fallback_specs_and_responses()
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory);(root/'scripts').mkdir();(root/'scripts/news_sources.json').write_text(json.dumps(specs))
+            target=root/'src/data/today.json';target.parent.mkdir(parents=True)
+            original=b'{"date":"2026-10-28","items":[]}\n';target.write_bytes(original)
+            with patch.object(news,'fetch',side_effect=OSError('Source unavailable')):
+                result=news.run(root,NOW,write=True)
+            self.assertEqual(result['status'],'skipped')
+            self.assertEqual(result['sourceCandidates'],{spec['id']:0 for spec in specs})
+            self.assertEqual(target.read_bytes(),original)
+            self.assertFalse((root/'scripts/data/editorial-record.json').exists())
 
 if __name__=='__main__': unittest.main()

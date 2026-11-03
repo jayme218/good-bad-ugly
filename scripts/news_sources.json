@@ -56,5 +56,92 @@
     "feedDocumentation": "https://www.ftc.gov/stay-connected/rss",
     "reusePolicy": "https://www.ftc.gov/policy-notices/website-policy",
     "scope": "Attributed FTC press releases only; excludes filings, comments, images and third-party material. Allegations remain allegations."
+  },
+  {
+    "id": "nsf",
+    "name": "U.S. National Science Foundation",
+    "family": "science",
+    "categories": [
+      "good"
+    ],
+    "hosts": [
+      "www.nsf.gov"
+    ],
+    "feeds": [
+      "https://www.nsf.gov/rss/rss_www_news.xml"
+    ],
+    "articlePathPrefixes": [
+      "/news/"
+    ],
+    "feedDocumentation": "https://www.nsf.gov/rss",
+    "reusePolicy": "https://www.nsf.gov/policies/digital#copyright-and-reuse-of-images-and-text",
+    "scope": "Attributed NSF-written news text only; exclude podcasts, images, logos, credited third-party material and related-story teasers. Preserve preliminary findings and candidate status.",
+    "requireArticleBody": true,
+    "rejectThirdPartyReprints": true
+  },
+  {
+    "id": "bea",
+    "name": "U.S. Bureau of Economic Analysis",
+    "family": "economy",
+    "categories": [
+      "bad"
+    ],
+    "hosts": [
+      "apps.bea.gov",
+      "www.bea.gov",
+      "bea.gov"
+    ],
+    "feeds": [
+      "https://apps.bea.gov/rss/rss.xml"
+    ],
+    "articlePathPrefixes": [
+      "/news/"
+    ],
+    "feedDocumentation": "https://www.bea.gov/news",
+    "reusePolicy": "https://www.bea.gov/help/faq/147",
+    "scope": "Attributed BEA statistical release text only, excluding credited third-party material. A displayed adverse measure is required; preserve mixed economic context."
+  },
+  {
+    "id": "doj",
+    "name": "U.S. Department of Justice",
+    "family": "justice",
+    "categories": [
+      "ugly"
+    ],
+    "hosts": [
+      "www.justice.gov"
+    ],
+    "feeds": [
+      "https://www.justice.gov/news/rss?m=1"
+    ],
+    "articlePathPrefixes": [
+      "/opa/pr/"
+    ],
+    "feedDocumentation": "https://www.justice.gov/news",
+    "reusePolicy": "https://www.justice.gov/legalpolicies",
+    "scope": "Attributed DOJ-written Office of Public Affairs press releases only; exclude videos, court filings, images, seals and third-party material. Preserve allegations, pleas and adjudication status."
+  },
+  {
+    "id": "fda",
+    "name": "U.S. Food and Drug Administration",
+    "family": "health",
+    "categories": [
+      "good"
+    ],
+    "hosts": [
+      "www.fda.gov"
+    ],
+    "feeds": [
+      "https://www.fda.gov/about-fda/contact-fda/stay-informed/rss-feeds/press-releases/rss.xml"
+    ],
+    "articlePathPrefixes": [
+      "/news-events/press-announcements/"
+    ],
+    "upgradeHttpLinks": true,
+    "requireArticleBody": true,
+    "rejectThirdPartyReprints": true,
+    "feedDocumentation": "https://www.fda.gov/about-fda/contact-fda/subscribe-podcasts-and-news-feeds",
+    "reusePolicy": "https://www.fda.gov/about-fda/about-website/website-policies#linking-to-or-copying-information-on-the-fda-website",
+    "scope": "Attributed FDA-written press announcements only; exclude company-provided recall notices, logos, images, filings and credited third-party text. Preserve accelerated-approval limitations. Upgrade only allowlisted legacy article links to HTTPS; never fetch HTTP."
   }
 ]

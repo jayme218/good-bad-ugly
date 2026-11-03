@@ -8,6 +8,24 @@ An eligible draft is published without waiting for owner review. If source acces
 
 Source endpoints and reuse references are in `scripts/news_sources.json`. NASA collection reads three bounded feed pages (up to 30 recent entries), and BLS includes metropolitan employment and workplace injury releases. Short feed teasers are checked against a scoped article body before final classification; article requests remain capped at six per source. The run reports rejected sources/candidates; the current editorial record retains source titles, timestamps and exact supporting passages. The duplicate ledger is limited to the previous 30 days. No images or logos are copied. Bad headlines use a short factual template matched to an adverse statement actually included in the displayed excerpts, while the original title stays in the editorial record. Ugly excerpts must likewise include a specific reported deceptive practice, not only company background or the fact that a complaint exists. Incomplete quotation fragments and promotional warning roundups are excluded.
 
+## Source pool and fallbacks
+
+Seven allowlisted official publishers supply alternative candidates; source access alone does not make an article eligible.
+
+| Category | Sources | Topic families |
+| --- | --- | --- |
+| Good | NASA, NSF, FDA | Science; health |
+| Bad | BLS, BEA | Economy |
+| Ugly | FTC, DOJ Office of Public Affairs | Consumer protection; justice |
+
+An edition still uses three different topic families. NASA and NSF share the science family; BLS and BEA share economy. One source failure is reported and collection continues with the others. The diagnostic result includes `sourceCandidates` so an accessible feed with zero eligible articles is distinguishable from a usable fallback.
+
+NSF articles use their exact news-body field. Full-page provenance checks reject externally republished text, including the observed Rubin Observatory repost, even if the RSS teaser already contains three sentences. FDA is limited to its own press announcements and preserves accelerated-approval limitations. Its legacy HTTP article links are upgraded only for the explicit agency host/path allowlist; requests still use HTTPS exclusively. FDA company recall announcements, DOJ videos and non-OPA paths are outside scope.
+
+BEA eligibility requires a supported adverse economic measure, including a reported PCE price-index increase. A stock-index increase, forecast, decrease or unchanged PCE figure does not qualify through that rule. Mixed income/growth context is retained alongside the actual adverse statement.
+
+The feed documentation, reuse policy and content restrictions for each source are recorded in `scripts/news_sources.json`. NIH, NOAA, USGS, NCI, OSHA, CFTC, CFPB and SEC candidates were not enabled during this expansion when current access, freshness, feed availability or article-body evidence was insufficient. No paid fallback or unsupported daily-publication guarantee is introduced.
+
 ## Local checks
 
 ```sh

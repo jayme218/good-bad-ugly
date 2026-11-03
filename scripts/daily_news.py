@@ -31,6 +31,15 @@ CONTENT = '{http://purl.org/rss/1.0/modules/content/}encoded'
 ATOM = '{http://www.w3.org/2005/Atom}'
 
 
+def article_path_allowed(url, spec):
+    prefixes = spec.get('articlePathPrefixes')
+    if not prefixes:
+        return True
+    path = urllib.parse.unquote(urllib.parse.urlsplit(url).path)
+    return ('\\' not in path and not any(part in ('.', '..') for part in path.split('/'))
+            and any(path.startswith(prefix) for prefix in prefixes))
+
+
 def chicago_date(now):
     return now.astimezone(ZoneInfo('America/Chicago')).date().isoformat()
 
@@ -39,7 +48,8 @@ def allowed_url(url, spec):
     try:
         parts = urllib.parse.urlsplit(url)
         return (parts.scheme == 'https' and parts.hostname in spec['hosts']
-                and not parts.username and not parts.password and parts.port in (None, 443))
+                and not parts.username and not parts.password and parts.port in (None, 443)
+                and (not spec.get('_articleRequest') or article_path_allowed(url, spec)))
     except ValueError:
         return False
 
@@ -59,7 +69,7 @@ class SafeRedirect(urllib.request.HTTPRedirectHandler):
 def fetch(url, spec):
     if not allowed_url(url, spec):
         raise ValueError('URL outside source allowlist')
-    request = urllib.request.Request(url, headers={'User-Agent':'GoodBadUgly/1.0 (public news feed reader)', 'Accept':'application/rss+xml, application/atom+xml, text/html, application/xml'})
+    request = urllib.request.Request(url, headers={'User-Agent':'GoodBadUgly/1.0 (public news feed reader)', 'Accept':'application/rss+xml, application/atom+xml, text/html, application/xml, text/xml;q=0.9, */*;q=0.5'})
     with urllib.request.build_opener(SafeRedirect(spec)).open(request, timeout=TIMEOUT) as response:
         if not allowed_url(response.geturl(), spec):
             raise ValueError('final URL outside source allowlist')
@@ -86,6 +96,23 @@ def plain(text):
     return re.sub(r'\s+', ' ', unescape(text)).strip()
 
 
+def article_url(url, spec):
+    # A few official HTTPS feeds retain HTTP links. Upgrade only explicit,
+    # allowlisted legacy entries; fetching an HTTP URL remains prohibited.
+    if not spec.get('upgradeHttpLinks'):
+        return url
+    try:
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != 'http':
+            return url
+        if (parts.hostname not in spec['hosts'] or parts.username is not None
+                or parts.password is not None or parts.port not in (None, 80)):
+            return ''
+        return urllib.parse.urlunsplit(('https', parts.hostname, parts.path, parts.query, parts.fragment))
+    except ValueError:
+        return ''
+
+
 def parse_feed(data, spec, now):
     if b'<!DOCTYPE' in data.upper() or b'<!ENTITY' in data.upper():
         raise ValueError('DTD and entity declarations are unsupported')
@@ -109,7 +136,10 @@ def parse_feed(data, spec, now):
             url = (entry.findtext('link') or '').strip()
             published = parse_date(entry.findtext('pubDate'))
             body = entry.findtext(CONTENT) or entry.findtext('description','')
+        url = article_url(url, spec)
         if not title or not allowed_url(url,spec) or not published:
+            continue
+        if not article_path_allowed(url, spec):
             continue
         if published > now or now - published > dt.timedelta(days=7):
             continue
@@ -164,6 +194,7 @@ BAD_HEADLINES = (
     (r'\bemployment (?:fell|declined|decreased)\b', 'Employment declines reported'),
     (r'\bunemployment (?:rate )?(?:rose|increased)\b', 'Unemployment rises reported'),
     (r'\bprices (?:rose|increased)\b', 'Price increases reported'),
+    (r'\bpce price index(?: for [a-z]+)? increased\b', 'PCE price increases reported'),
     (r'\bfatal injuries\b', 'Fatal injuries reported'),
     (r'\bjob losses\b', 'Job losses reported'),
     (r'\binflation (?:rose|increased)\b', 'Inflation increases reported'),
@@ -191,8 +222,12 @@ def excerpts(body, required_pattern=None):
         if re.search(r'copyright|all rights reserved|subscribe|sign up|media contact|technical information:|transmission of material|for more information|\bcookie\b', paragraph, re.I):
             continue
         protected = paragraph
-        for token in ('U.S.','U.K.','Dr.','Mr.','Ms.','Inc.','e.g.','i.e.'):
+        for token in ('U.S.','U.K.','Dr.','Mr.','Ms.','Inc.','e.g.','i.e.','B. Pharm.','B.Pharm.','M.S.'):
             protected = protected.replace(token,token.replace('.','∯'))
+        # Initials are not sentence boundaries (for example Vera C. Rubin).
+        # If ambiguous, retaining adjoining complete text is safer than emitting
+        # the sentence fragment before the initial as a standalone statement.
+        protected = re.sub(r'\b([A-Z])\.(?=\s+[A-Z])', r'\1∯', protected)
         sentences = re.split(r'(?<=[.!?])\s+(?=[A-Z“"0-9])', protected)
         in_curly_quote = in_ascii_quote = False
         for sentence in sentences:
@@ -238,7 +273,7 @@ class ArticleBody(HTMLParser):
         classes = set((attributes.get('class') or '').split())
         # Drupal body fields are narrower than their enclosing article. BLS
         # releases mark the release text as bodytext, often containing a pre.
-        body = bool(classes & {'field--name-body', 'field-name-body', 'body-content'})
+        body = bool(classes & {'field--name-body', 'field-name-body', 'body-content', 'field-news-body'})
         body = body or attributes.get('id') == 'bodytext'
         if body or tag == 'article':
             self.active.append({'depth': self.depth, 'rank': 0 if body else 1, 'parts': []})
@@ -300,8 +335,10 @@ def category(entry, spec):
     title = entry['title'].lower()
     body = plain(re.sub(r'<[^>]+>',' ', entry['body'])).lower()
     if 'good' in spec['categories']:
-        if re.search(r'\b(invites media|key events|schedule|image|webinar|podcast|potential|request for information|ice loss|warming|melt\w*|declin\w*|risk\w*|threat\w*|damage|loss|fail\w*|danger\w*|death\w*|fatal|harm\w*|drought|flood\w*|cancel\w*)\b',title):
+        if re.search(r'\b(invites media|key events|schedule|image|webinar|podcast|potential|request for information|ice loss|warming|melt\w*|declin\w*|risk\w*|threat\w*|damage|loss|fail\w*|danger\w*|death\w*|fatal|harm\w*|drought|flood\w*|cancel\w*|withdraw\w*|revok\w*)\b',title):
             return None
+        if spec.get('id') == 'fda' and re.search(r'^fda approves\b',title):
+            return 'good'
         if re.search(r'\b(discover\w*|achiev\w*|success\w*|complet\w*|selects|advanc\w*|improv\w*)\b',title):
             return 'good'
     if 'bad' in spec['categories']:
@@ -344,13 +381,18 @@ def collect(specs, now, used):
                 continue
             kind = category(entry,spec)
             passages = excerpts(entry['body'], EVIDENCE_PATTERNS.get(kind))
-            if not kind or not passages:
+            if not kind or not passages or spec.get('requireArticleBody') or spec.get('rejectThirdPartyReprints'):
                 if body_fetches >= MAX_ARTICLES_PER_SOURCE:
                     reports.append({'source':spec['id'],'url':entry['url'],'reason':'article request budget exhausted'})
                     continue
                 body_fetches += 1
                 try:
-                    body = article_body(fetch(entry['url'],spec))
+                    data = fetch(entry['url'],{**spec, '_articleRequest':True})
+                    if spec.get('rejectThirdPartyReprints'):
+                        page = plain(re.sub(r'<[^>]+>', ' ', data.decode('utf-8', errors='replace')))
+                        if re.search(r'\b(?:this (?:article|story|release) (?:was |is )?(?:originally published|first published|reprinted|republished)|originally published (?:by|in|on)|reprinted from|republished from)\b', page, re.I):
+                            raise ValueError('source identifies this article as third-party reprinted material')
+                    body = article_body(data)
                     entry = {**entry, 'body': body}
                     kind = category(entry,spec)
                     passages = excerpts(body, EVIDENCE_PATTERNS.get(kind))
@@ -368,7 +410,7 @@ def collect(specs, now, used):
                     'summaries':[f"{spec['name']} reports: {s}" for s in passages],
                     'editorNote':f"Automatically selected and excerpted from {spec['name']}. Category assignment is editorial; this draft has not been independently fact-checked.",
                     'source':{'name':spec['name'],'url':entry['url'],'publishedAt':entry['published'].date().isoformat()}}
-            candidates.append({'type':kind,'family':spec['family'],'url':entry['url'],'published':entry['published'],'item':item,
+            candidates.append({'type':kind,'family':spec['family'],'sourceId':spec['id'],'url':entry['url'],'published':entry['published'],'item':item,
                                'audit':{'type':kind,'source':spec['name'],'url':entry['url'],'sourceTitle':entry['title'],'publishedAt':entry['published'].isoformat(),'checkedAt':now.isoformat(),'supportingPassages':passages}})
     return candidates, reports
 
@@ -447,12 +489,17 @@ def run(root, now, write=False):
     if not specs:
         raise ValueError('no approved sources configured')
     candidates,reports=collect(specs,now,used)
+    source_counts = {spec['id']:0 for spec in specs if 'id' in spec}
+    for candidate in candidates:
+        source_id = candidate.get('sourceId')
+        if source_id in source_counts:
+            source_counts[source_id] += 1
     selected=select_edition(candidates,used,now)
     if not selected:
-        return {'status':'skipped','reason':'not enough eligible distinct-source stories for all three categories','date':day,'eligible':{kind:sum(c['type']==kind for c in candidates) for kind in TYPES},'reports':reports}
+        return {'status':'skipped','reason':'not enough eligible distinct-source stories for all three categories','date':day,'eligible':{kind:sum(c['type']==kind for c in candidates) for kind in TYPES},'sourceCandidates':source_counts,'reports':reports}
     edition,audit=selected
     validate_generated_edition(edition)
-    result={'status':'draft','edition':edition,'audit':audit,'reports':reports}
+    result={'status':'draft','edition':edition,'audit':audit,'sourceCandidates':source_counts,'reports':reports}
     if not write:
         return result
     # Refuse concurrent edits made after collection; workflow also rejects remote races.
