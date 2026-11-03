@@ -1,45 +1,45 @@
 {
-  "editionDate": "2026-10-31",
+  "editionDate": "2026-11-02",
   "revision": 0,
-  "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+  "checkedAt": "2026-11-03T03:34:52.023349+00:00",
   "stories": [
     {
       "type": "good",
-      "source": "NASA",
-      "url": "https://science.nasa.gov/get-involved/citizen-science/nasa-selects-19-new-citizen-science-proposals-in-2026/",
-      "sourceTitle": "NASA Selects 19 New Citizen Science Proposals in 2026",
-      "publishedAt": "2026-10-28T16:25:29+00:00",
-      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "source": "U.S. Food and Drug Administration",
+      "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-plasmid-dna-based-immunotherapy-adults-recurrent-respiratory-papillomatosis",
+      "sourceTitle": "FDA Approves First Plasmid DNA-based Immunotherapy for Adults with Recurrent Respiratory Papillomatosis",
+      "publishedAt": "2026-10-30T20:32:08+00:00",
+      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
       "supportingPassages": [
-        "So far, 2026 has seen a flood of successes for volunteers who do NASA science, exemplifying NASA’s commitment to gold-standard science—transparent, reproducible and intrinsically collaborative.",
-        "The Backyard Worlds: Planet 9 project announced that their project volunteers have now discovered most of the known brown dwarfs, celestial objects that are similar to planets.",
-        "The Zooniverse platform, with grant from NASA, reached a milestone of 1 billion classifications."
+        "The U.S. Food and Drug Administration today granted accelerated approval for Voceryq (doruxapapogene ralaplasmid and lalikinogene sifuplasmid-gxfd) for treatment of adults with recurrent respiratory papillomatosis (RRP), a rare disease caused by human papillomavirus (HPV) that leads to the formation of small, wart-like growths in the patient’s airways.",
+        "This approval, the first for a plasmid DNA-based immunotherapy in the U.S., offers patients a new therapeutic option that targets the root cause of RRP and has been shown to reduce the burden of surgical intervention, representing an important step forward for a patient population with limited treatment options.",
+        "The agency based this accelerated approval on clinical trial data showing Voceryq helps reduce the frequency of surgical procedures required to remove growths in adult patients with RRP — an intermediate clinical endpoint reasonably likely to predict clinical benefit."
       ]
     },
     {
       "type": "bad",
-      "source": "U.S. Bureau of Labor Statistics",
-      "url": "https://www.bls.gov/news.release/archives/metro_10282026.htm",
-      "sourceTitle": "Sept. jobless rates down over the year in 226 of 387 metro areas; payroll jobs up in 11",
-      "publishedAt": "2026-10-28T13:21:07.498000+00:00",
-      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "source": "U.S. Bureau of Economic Analysis",
+      "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-september-2026",
+      "sourceTitle": "Personal Income and Outlays, September 2026",
+      "publishedAt": "2026-10-29T12:30:00+00:00",
+      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
       "supportingPassages": [
-        "Unemployment rates were lower in September than a year earlier in 226 of the 387 metropolitan areas, higher in 138 areas, and unchanged in 23 areas, the U.S. Bureau of Labor Statistics reported today.",
-        "A total of 48 areas had jobless rates of less than 3.0 percent, and 5 areas had rates of at least 8.0 percent.",
-        "Over the year, employment decreased in Washington-Arlington-Alexandria, DC-VA-MD-WV (-1.8 percent)."
+        "Personal income increased $54.5 billion (0.2 percent at a monthly rate) in September, according to estimates released today by the U.S. Bureau of Economic Analysis (BEA).",
+        "Disposable personal income (DPI)—personal income less personal current taxes—increased $52.7 billion (0.2 percent), and personal consumption expenditures (PCE) increased $113.1 billion (0.5 percent).",
+        "From the preceding month, the PCE price index for September increased 0.5 percent."
       ]
     },
     {
       "type": "ugly",
       "source": "Federal Trade Commission",
-      "url": "https://www.ftc.gov/news-events/news/press-releases/2026/10/ftc-states-take-action-against-toast-inc-over-hidden-unauthorized-fees-deceptive-subscription",
-      "sourceTitle": "FTC and States Take Action Against Toast Inc. over Hidden and Unauthorized Fees, Deceptive Subscription and Cancellation Practices and Other Unlawful Conduct",
-      "publishedAt": "2026-10-29T12:00:00+00:00",
-      "checkedAt": "2026-11-01T01:23:07.811785+00:00",
+      "url": "https://www.ftc.gov/news-events/news/press-releases/2026/11/ftc-washington-take-action-against-payment-processor-deceiving-small-businesses-about-costs",
+      "sourceTitle": "FTC, Washington Take Action Against Payment Processor for Deceiving Small Businesses About Costs and Cancellation Terms",
+      "publishedAt": "2026-11-02T12:00:00+00:00",
+      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
       "supportingPassages": [
-        "Toast markets and sells point-of-sale hardware and software and payment processing services to small businesses in the restaurant industry.",
-        "Toast’s cloud-based products and services are used to take and manage orders, accept payments and track inventory, among other related services.",
-        "The FTC and state co-plaintiffs allege Toast deceives customers by imposing various types of fees on the cost of its hardware and software, which Toast fails to clearly disclose to its customers."
+        "Small businesses also will be able to rescind processing agreements without a termination penalty under the proposed order settling the FTC and Washington’s allegations.",
+        "The FTC and Washington allege that Riverside’s sales pitches included a quote sheet that compared the costs prospective clients paid their existing payment processor with the amount they would save if they used Riverside’s services instead.",
+        "The FTC alleges that Riverside’s practices violated the FTC Act and the Gramm-Leach-Bliley Act by obtaining consumers’ financial information by using false or fraudulent statements."
       ]
     }
   ]
