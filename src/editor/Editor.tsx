@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { compareEditions } from '../editionUpdates'
+import { PublicationStatus } from './PublicationStatus'
+import { createPublicationChecker, draftMatchesPublication, pendingFromCorrection, PUBLICATION_KEY, restorePublication, type PendingPublication, type PublicationResult } from './publication'
 import { StoryBody } from '../components/NewsCard'
 import { parseEdition } from '../edition'
 import { editorialToday, formatEditionDate } from '../timezone'
@@ -9,7 +12,7 @@ import './editor.css'
 const labels = { good: 'The Good', bad: 'The Bad', ugly: 'The Ugly' }
 
 async function loadEdition(signal?: AbortSignal): Promise<LoadedEdition> {
-  const response = await fetch(`${import.meta.env.BASE_URL}edition.json`, { cache: 'no-store', signal })
+  const response = await fetch(`${import.meta.env.BASE_URL}edition.json?editor_check=${Date.now()}`, { cache: 'no-store', signal })
   if (!response.ok) throw new Error('The published edition could not be loaded. Check your connection and try again.')
   const raw = await response.text()
   let data: unknown
@@ -42,18 +45,96 @@ export default function Editor() {
   const [fallback, setFallback] = useState('')
   const fallbackRef = useRef<HTMLTextAreaElement>(null)
   const skipRestore = useRef(false)
+  const [pendingPublication, setPendingPublication] = useState<PendingPublication | null>(() => {
+    try { return restorePublication(localStorage.getItem(PUBLICATION_KEY)) } catch { return null }
+  })
+  const pendingPublicationRef = useRef(pendingPublication)
+  const [publicationResult, setPublicationResult] = useState<PublicationResult | null>(null)
+  const [publicationChecking, setPublicationChecking] = useState(false)
+  const [publicationStorageWarning, setPublicationStorageWarning] = useState('')
+  const [checkCycle, setCheckCycle] = useState(0)
+
+  function acceptLoaded(next: LoadedEdition) {
+    setLoaded((current) => !current || compareEditions(next.edition, current.edition) >= 0 ? next : current)
+  }
+
+  function clearPublication() {
+    pendingPublicationRef.current = null
+    setPendingPublication(null)
+    setPublicationResult(null)
+    setPublicationChecking(false)
+    try { localStorage.removeItem(PUBLICATION_KEY); setPublicationStorageWarning('') }
+    catch { setPublicationStorageWarning('Progress tracking could not be cleared on this device.') }
+  }
+
+  useEffect(() => {
+    if (!pendingPublication) return
+    let generation = 0
+    let timer: number | undefined
+    let checker: ReturnType<typeof createPublicationChecker> | null = null
+    let busy = false
+    let lastStart = -Infinity
+    let disposed = false
+    function visible() { return document.visibilityState !== 'hidden' }
+    function stop() {
+      generation += 1
+      window.clearTimeout(timer)
+      timer = undefined
+      checker?.dispose()
+      checker = null
+      busy = false
+    }
+    function start() {
+      if (disposed || pendingPublicationRef.current !== pendingPublication || !visible() || busy || Date.now() - lastStart < 500) return
+      stop()
+      lastStart = Date.now()
+      const cycle = generation
+      let count = 0
+      let outcome: PublicationResult['kind'] | null = null
+      const currentChecker = createPublicationChecker(pendingPublication!, loadEdition, (result) => {
+        if (disposed || cycle !== generation || pendingPublicationRef.current !== pendingPublication) return
+        outcome = result.kind
+        setPublicationResult(result)
+        if (result.kind !== 'error') acceptLoaded(result.current)
+      })
+      checker = currentChecker
+      async function check() {
+        if (disposed || cycle !== generation || pendingPublicationRef.current !== pendingPublication || !visible() || count >= 6) return
+        count += 1
+        busy = true
+        setPublicationChecking(true)
+        await currentChecker.check()
+        if (disposed || cycle !== generation || pendingPublicationRef.current !== pendingPublication) return
+        busy = false
+        setPublicationChecking(false)
+        if (outcome === 'waiting' && count < 6 && visible()) timer = window.setTimeout(() => { void check() }, 10_000)
+      }
+      void check()
+    }
+    function visibility() {
+      if (document.visibilityState === 'hidden') { stop(); lastStart = -Infinity; setPublicationChecking(false) }
+      else start()
+    }
+    window.addEventListener('focus', start)
+    document.addEventListener('visibilitychange', visibility)
+    start()
+    return () => { disposed = true; stop(); window.removeEventListener('focus', start); document.removeEventListener('visibilitychange', visibility) }
+  }, [pendingPublication, checkCycle])
 
   useEffect(() => {
     const controller = new AbortController()
     void loadEdition(controller.signal).then((current) => {
       if (controller.signal.aborted) return
+      const resetting = skipRestore.current
       let saved: Draft | null = null
-      if (!skipRestore.current) {
+      if (!resetting) {
         try { saved = restoreDraft(localStorage.getItem(DRAFT_KEY)) } catch { /* Storage is optional. */ }
       }
       skipRestore.current = false
-      setLoaded(current)
+      acceptLoaded(current)
+      setLoadError('')
       saveDraft(saved ?? createDraft(current))
+      if (resetting) clearPublication()
       setRefreshing(false)
     }).catch((error) => {
       if (!controller.signal.aborted) {
@@ -75,15 +156,17 @@ export default function Editor() {
   }
 
   const changed = draft ? hasChanges(draft) : false
+  const additionalEdits = Boolean(draft && pendingPublication && !draftMatchesPublication(draft, pendingPublication))
+  const unpublishedLocalChanges = publicationResult?.kind === 'live' ? additionalEdits : changed
   useEffect(() => {
-    if (!changed) return
+    if (!unpublishedLocalChanges) return
     function protect(event: BeforeUnloadEvent) { event.preventDefault(); event.returnValue = '' }
     window.addEventListener('beforeunload', protect)
     return () => window.removeEventListener('beforeunload', protect)
-  }, [changed])
+  }, [unpublishedLocalChanges])
 
   function resetToCurrent() {
-    if (changed && !window.confirm('Discard this device’s draft and load the latest published edition? Download a backup first if you need to keep it.')) return
+    if (unpublishedLocalChanges && !window.confirm('Discard this device’s draft and load the latest published edition? Download a backup first if you need to keep it.')) return
     skipRestore.current = true
     setLoadError('')
     setRefreshing(true)
@@ -96,16 +179,22 @@ export default function Editor() {
     setCopyState('')
     try {
       const current = await loadEdition()
-      setLoaded(current)
+      acceptLoaded(current)
       if (current.sha256 !== draft.base.sha256) {
         setCopyState('The published edition changed. Your draft is kept here. Download a backup, then load the latest edition before publishing.')
         return
       }
       const payload = prepareCorrection(draft, editorialToday().iso)
       setFallback(payload)
+      const target = pendingFromCorrection(payload)
+      pendingPublicationRef.current = target
+      setPendingPublication(target)
+      setPublicationResult(null)
+      try { localStorage.setItem(PUBLICATION_KEY, JSON.stringify(target)); setPublicationStorageWarning('') }
+      catch { setPublicationStorageWarning('Progress tracking could not be saved on this device. Keep this tab open to confirm publication.') }
       try {
         await navigator.clipboard.writeText(payload)
-        setCopyState('Correction copied. It is not published yet; complete the GitHub steps below.')
+        setCopyState('Correction copied. Copying alone does not publish; complete the GitHub steps below.')
       } catch { setCopyState('Automatic copying is unavailable. Select and copy the correction below, then continue to GitHub.') }
     } catch (error) { setCopyState(error instanceof Error ? error.message : 'Unable to prepare this correction. Try again.') }
     finally { setCopying(false) }
@@ -164,7 +253,7 @@ export default function Editor() {
           <button type="button" disabled={copying || refreshing} onClick={resetToCurrent}>{refreshing ? 'Loading latest edition…' : 'Load latest edition'}</button>
         </section>
         {loadError ? <p role="alert" className="editor-notice">{loadError}</p> : null}
-        {stale ? <aside className="editor-notice" role="alert"><h2>A newer edition is available</h2><p>This draft belongs to an earlier version and cannot be published. Your edits are kept here. Download a backup before loading the latest edition.</p><button type="button" onClick={downloadBackup}>Download draft backup</button></aside> : null}
+        {stale && publicationResult?.kind !== 'live' ? <aside className="editor-notice" role="alert"><h2>Published edition changed</h2><p>This draft belongs to an earlier version and cannot be published. Your edits are kept here. Download a backup before loading the latest edition.</p><button type="button" onClick={downloadBackup}>Download draft backup</button></aside> : null}
         <div className="editor-story-tabs" role="group" aria-label="Choose a story">
           {NEWS_TYPES.map((type) => <button type="button" key={type} aria-pressed={active === type} onClick={() => setActive(type)}>{labels[type]}{Object.keys(errors).some((key) => key.startsWith(`${type}.`)) ? <span className="editor-tab-error"> · Check fields</span> : null}</button>)}
         </div>
@@ -189,15 +278,19 @@ export default function Editor() {
           <section className="editor-preview" aria-label="Live story preview"><h2>Reader preview</h2><p className="editor-hint">Your draft as it will appear to readers.</p>{preview ? <article className="editor-preview-article"><StoryBody item={preview} fillHeight={false} /></article> : null}</section>
         </div>
         <section className="editor-publish" aria-labelledby="editor-publish-title">
-          <div><h2 id="editor-publish-title">Publish this correction</h2><p role="status" className="editor-storage">{storageState}</p></div>
+          <div><h2 id="editor-publish-title">Publish this correction</h2><p role="status" className="editor-storage">{publicationResult?.kind === 'live' && additionalEdits && storageState === 'No unpublished changes.' ? 'Local edits differ from the published correction.' : storageState}</p></div>
           <label className="editor-review"><input type="checkbox" disabled={copying || refreshing} checked={draft.reviewed} onChange={(event) => saveDraft({ ...draft, reviewed: event.target.checked })} /><span>I have checked all three stories and their sources. Mark this edition editor-reviewed.</span></label>
           {errors.edition ? <p role="alert" className="editor-error">{errors.edition}</p> : null}
           {Object.keys(errors).length ? <p className="editor-error">Check the marked fields in each story before continuing.</p> : null}
           {preparationError ? <p role="alert" className="editor-error">{preparationError}</p> : null}
           <ol className="editor-steps"><li>Copy the correction below.</li><li>Open the GitHub publisher and sign in as the repository owner.</li><li>Choose <strong>Run workflow</strong>, paste into <strong>correction</strong>, and run. Wait for the deployment to finish.</li></ol>
           <div className="editor-actions"><button className="editor-primary" type="button" disabled={!canCopy || copying} onClick={() => void copyCorrection()}>{copying ? 'Checking the latest edition…' : 'Copy correction'}</button><a className="editor-button" href={PUBLISHER_URL} target="_blank" rel="noopener noreferrer">Open GitHub publisher<span className="sr-only"> (opens in a new tab)</span></a><button type="button" onClick={downloadBackup}>Download draft backup</button></div>
-          {copyState ? <p role="status" className="editor-copy-status">{copyState}</p> : null}
-          {fallback ? <details className="editor-copy-fallback" open={copyState.startsWith('Automatic')}><summary>Correction to paste into GitHub</summary><label htmlFor="editor-correction">Prepared correction</label><textarea id="editor-correction" ref={fallbackRef} readOnly rows={5} value={fallback} onFocus={(event) => event.target.select()} /><button type="button" onClick={() => { fallbackRef.current?.focus(); fallbackRef.current?.select() }}>Select correction</button></details> : null}
+          {pendingPublication ? <PublicationStatus pending={pendingPublication} result={publicationResult} checking={publicationChecking}
+            additionalEdits={additionalEdits}
+            storageWarning={publicationStorageWarning} disabled={copying || refreshing}
+            onCheck={() => setCheckCycle((value) => value + 1)} onLoad={resetToCurrent} /> : null}
+          {copyState && publicationResult?.kind !== 'live' && publicationResult?.kind !== 'different' ? <p role="status" className="editor-copy-status">{copyState}</p> : null}
+          {fallback && publicationResult?.kind !== 'live' && publicationResult?.kind !== 'different' ? <details className="editor-copy-fallback" open={copyState.startsWith('Automatic')}><summary>Correction to paste into GitHub</summary><label htmlFor="editor-correction">Prepared correction</label><textarea id="editor-correction" ref={fallbackRef} readOnly rows={5} value={fallback} onFocus={(event) => event.target.select()} /><button type="button" onClick={() => { fallbackRef.current?.focus(); fallbackRef.current?.select() }}>Select correction</button></details> : null}
           <p className="editor-hint">Copying does not publish. If another edition or correction is saved first, GitHub rejects the older draft. Reload the current edition and reapply your edits.</p>
         </section>
       </>}

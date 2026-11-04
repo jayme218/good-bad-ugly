@@ -88,3 +88,8 @@
   .editor-actions { flex-direction: column; }
   .editor-actions > * { width: 100%; }
 }
+
+.editor-publication-status { margin-top: 1.5rem; padding: 1.25rem; border: 1px solid #000; max-width: 75ch; overflow-wrap: anywhere; }
+.editor-publication-status h3 { font-size: 1.125rem; font-weight: 500; }
+.editor-publication-status p { margin-top: 0.65rem !important; }
+.editor-publication-status .editor-actions { margin-top: 1rem; }

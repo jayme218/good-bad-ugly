@@ -9,9 +9,13 @@ Open [the edition editor](https://jayme218.github.io/good-bad-ugly/#/editor). Ed
 1. Select **Copy correction**. This prepares a correction and checks that the published original has not changed. It does not publish.
 2. Select **Open GitHub publisher**, sign in as `jayme218`, and choose **Run workflow** on `main`.
 3. Paste the copied correction into the **correction** field and run it.
-4. Wait for **Publish owner correction** and its reused Pages deployment to succeed. Check the live edition before considering publication complete.
+4. Wait for **Publish owner correction** and its reused Pages deployment to succeed. Return to the editor: it checks the deployed edition on tab return. **Your correction is live** appears only when the date, revision and all story content match the prepared correction. Use **Check publication** to retry.
 
 The editor route is public, but it contains no write credentials. Only the repository owner can run a successful correction publication; both the initial actor and a rerun actor are checked. Other users can prepare local text but cannot change the live articles. No browser token, login service or paid backend is required.
+
+The editor keeps the prepared target separately from your editable draft. Copying alone does not confirm a GitHub save or a live deployment. While visible and waiting, it makes up to six checks ten seconds apart; it stops in the background and on a terminal result. A failed or slow check says it cannot verify instead of claiming success. A different published revision or different content is reported as a conflict.
+
+Your draft is never cleared by a background check. If you made more edits after copying, the live message explicitly says those additional changes remain unpublished. **Load published correction** is an explicit action that starts a new draft from the live edition; download a backup before discarding additional edits. Pending-target tracking is saved on this device when local storage is available; success is always verified again after a reload.
 
 The publisher compares the exact original file fingerprint, date and revision before writing. A changed original or concurrent owner push rejects the correction. Keep your draft backup, load the latest edition and reapply the relevant changes. The collector’s original extraction audit remains unchanged; the correction commit records owner authorization.
 
