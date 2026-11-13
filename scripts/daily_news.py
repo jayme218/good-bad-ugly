@@ -20,6 +20,7 @@ import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from zoneinfo import ZoneInfo
+from collection_status import collection_report
 
 UTC = dt.timezone.utc
 MAX_BYTES = 2_000_000
@@ -365,45 +366,50 @@ def collect(specs, now, used):
             try:
                 fresh = parse_feed(fetch(feed,spec),spec,now)
                 if not fresh:
-                    reports.append({'source':spec['id'],'feed':feed,'reason':'no recent entries with valid publication dates and allowed URLs'})
+                    reports.append({'source':spec['id'],'feed':feed,'code':'noRecentEntries','reason':'no recent entries with valid publication dates and allowed URLs'})
                 for entry in fresh:
                     entries.setdefault(entry['url'],entry)
             except Exception as error:
-                reports.append({'source':spec['id'],'feed':feed,'reason':str(error)[:200]})
+                reports.append({'source':spec['id'],'feed':feed,'code':'unavailable','reason':str(error)[:200]})
         ranked = sorted(entries.values(),key=lambda e:(-e['published'].timestamp(),e['url']))
         body_fetches = 0
         for entry in ranked[:30]:
             if entry['url'] in used:
-                reports.append({'source':spec['id'],'url':entry['url'],'reason':'recently used'})
+                reports.append({'source':spec['id'],'url':entry['url'],'code':'duplicate','reason':'recently used'})
                 continue
             if not possible_category(entry,spec):
-                reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match'})
+                reports.append({'source':spec['id'],'url':entry['url'],'code':'unsuitable','reason':'no conservative category match'})
                 continue
             kind = category(entry,spec)
             passages = excerpts(entry['body'], EVIDENCE_PATTERNS.get(kind))
             if not kind or not passages or spec.get('requireArticleBody') or spec.get('rejectThirdPartyReprints'):
                 if body_fetches >= MAX_ARTICLES_PER_SOURCE:
-                    reports.append({'source':spec['id'],'url':entry['url'],'reason':'article request budget exhausted'})
+                    reports.append({'source':spec['id'],'url':entry['url'],'code':'requestLimit','reason':'article request budget exhausted'})
                     continue
                 body_fetches += 1
                 try:
                     data = fetch(entry['url'],{**spec, '_articleRequest':True})
-                    if spec.get('rejectThirdPartyReprints'):
-                        page = plain(re.sub(r'<[^>]+>', ' ', data.decode('utf-8', errors='replace')))
-                        if re.search(r'\b(?:this (?:article|story|release) (?:was |is )?(?:originally published|first published|reprinted|republished)|originally published (?:by|in|on)|reprinted from|republished from)\b', page, re.I):
-                            raise ValueError('source identifies this article as third-party reprinted material')
+                except Exception as error:
+                    reports.append({'source':spec['id'],'url':entry['url'],'code':'unavailable','reason':str(error)[:200]})
+                    continue
+                if spec.get('rejectThirdPartyReprints'):
+                    page = plain(re.sub(r'<[^>]+>', ' ', data.decode('utf-8', errors='replace')))
+                    if re.search(r'\b(?:this (?:article|story|release) (?:was |is )?(?:originally published|first published|reprinted|republished)|originally published (?:by|in|on)|reprinted from|republished from)\b', page, re.I):
+                        reports.append({'source':spec['id'],'url':entry['url'],'code':'unsuitable','reason':'source identifies this article as third-party reprinted material'})
+                        continue
+                try:
                     body = article_body(data)
                     entry = {**entry, 'body': body}
                     kind = category(entry,spec)
                     passages = excerpts(body, EVIDENCE_PATTERNS.get(kind))
                 except Exception as error:
-                    reports.append({'source':spec['id'],'url':entry['url'],'reason':str(error)[:200]})
+                    reports.append({'source':spec['id'],'url':entry['url'],'code':'insufficientEvidence','reason':str(error)[:200]})
                     continue
             if not kind:
-                reports.append({'source':spec['id'],'url':entry['url'],'reason':'no conservative category match in article body'})
+                reports.append({'source':spec['id'],'url':entry['url'],'code':'unsuitable','reason':'no conservative category match in article body'})
                 continue
             if len(passages) != 3:
-                reports.append({'source':spec['id'],'url':entry['url'],'reason':'fewer than three supported full sentences'})
+                reports.append({'source':spec['id'],'url':entry['url'],'code':'insufficientEvidence','reason':'fewer than three supported full sentences'})
                 continue
             # Every bullet is explicitly a source statement, not an independent finding.
             item = {'type':kind,'headline':bad_headline(passages) if kind == 'bad' else shorten(entry['title']),
@@ -476,8 +482,13 @@ def run(root, now, write=False):
     initial=target.read_bytes() if target.exists() else None
     current=json.loads(initial) if initial else None
     day=chicago_date(now)
+    specs=read_json(root/'scripts/news_sources.json',[])
+    def finish(result):
+        if write:
+            write_json(root/'public/collection-status.json', collection_report(result, specs, dt.datetime.now(UTC), os.environ))
+        return result
     if current and current.get('date','') >= day:
-        return {'status':'skipped','reason':'current-day or newer edition already exists; owner edits preserved','date':day}
+        return finish({'status':'skipped','reasonCode':'already-current','reason':'current-day or newer edition already exists; owner edits preserved','date':day})
     ledger_path=root/'scripts/data/recent-articles.json'
     ledger=read_json(ledger_path,[])
     cutoff=(now.astimezone(ZoneInfo('America/Chicago')).date()-dt.timedelta(days=30)).isoformat()
@@ -485,7 +496,6 @@ def run(root, now, write=False):
     used={entry['url'] for entry in recent if isinstance(entry.get('url'),str)}
     if current:
         used.update(i.get('source',{}).get('url','') for i in current.get('items',[]))
-    specs=read_json(root/'scripts/news_sources.json',[])
     if not specs:
         raise ValueError('no approved sources configured')
     candidates,reports=collect(specs,now,used)
@@ -495,22 +505,23 @@ def run(root, now, write=False):
         if source_id in source_counts:
             source_counts[source_id] += 1
     selected=select_edition(candidates,used,now)
+    eligible = {kind:sum(c['type']==kind for c in candidates) for kind in TYPES}
     if not selected:
-        return {'status':'skipped','reason':'not enough eligible distinct-source stories for all three categories','date':day,'eligible':{kind:sum(c['type']==kind for c in candidates) for kind in TYPES},'sourceCandidates':source_counts,'reports':reports}
+        return finish({'status':'skipped','reasonCode':'insufficient-stories','reason':'not enough eligible distinct-source stories for all three categories','date':day,'eligible':eligible,'sourceCandidates':source_counts,'reports':reports})
     edition,audit=selected
     validate_generated_edition(edition)
-    result={'status':'draft','edition':edition,'audit':audit,'sourceCandidates':source_counts,'reports':reports}
+    result={'status':'draft','reasonCode':'ready','edition':edition,'audit':audit,'eligible':eligible,'sourceCandidates':source_counts,'reports':reports}
     if not write:
         return result
     # Refuse concurrent edits made after collection; workflow also rejects remote races.
     if (target.read_bytes() if target.exists() else None) != initial:
-        return {'status':'skipped','reason':'current edition changed during collection; no overwrite','date':day}
+        return finish({'status':'skipped','reasonCode':'edition-changed','reason':'current edition changed during collection; no overwrite','date':day,'eligible':eligible,'sourceCandidates':source_counts,'reports':reports})
     recent.extend({'date':day,'url':entry['url']} for entry in audit)
     write_json(root/'scripts/data/editorial-record.json',{'editionDate':day,'revision':0,'checkedAt':now.isoformat(),'stories':audit})
     write_json(ledger_path,recent)
     write_json(target,edition)
     result['status']='published'
-    return result
+    return finish(result)
 
 
 def main():
@@ -520,7 +531,7 @@ def main():
     mode.add_argument('--write',action='store_true')
     parser.add_argument('--output',type=Path,help='optional diagnostic result path, outside publication state')
     args=parser.parse_args()
-    forbidden={ROOT/'src/data/today.json',ROOT/'scripts/data/editorial-record.json',ROOT/'scripts/data/recent-articles.json',ROOT/'scripts/news_sources.json'}
+    forbidden={ROOT/'src/data/today.json',ROOT/'scripts/data/editorial-record.json',ROOT/'scripts/data/recent-articles.json',ROOT/'scripts/news_sources.json',ROOT/'public/collection-status.json'}
     if args.output and args.output.resolve() in {p.resolve() for p in forbidden}:
         print(json.dumps({'status':'error','reason':'diagnostic output cannot overwrite publication files'}))
         return 1

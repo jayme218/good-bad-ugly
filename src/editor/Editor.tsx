@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 import { compareEditions } from '../editionUpdates'
 import { PublicationStatus } from './PublicationStatus'
+import { AutomationStatus } from './AutomationStatus'
 import { createPublicationChecker, draftMatchesPublication, pendingFromCorrection, PUBLICATION_KEY, restorePublication, type PendingPublication, type PublicationResult } from './publication'
 import { StoryBody } from '../components/NewsCard'
 import { parseEdition } from '../edition'
@@ -245,6 +246,7 @@ export default function Editor() {
     </header>
     <main className="editor-main">
       <p className="editor-access">Only the repository owner can publish. This tool prepares a draft; GitHub checks your account before changing the live articles.</p>
+      <AutomationStatus edition={loaded?.edition ?? null} />
       {!draft || !loaded ? <section className="editor-load" aria-live="polite">
         {loadError ? <><h2>Unable to load the edition</h2><p>{loadError}</p><button type="button" onClick={() => { setLoadError(''); setReload((value) => value + 1) }}>Try again</button></> : <><h2>Loading the published edition</h2><p>Reading the latest stories and their sources…</p></>}
       </section> : <>

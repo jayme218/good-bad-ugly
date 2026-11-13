@@ -40,6 +40,14 @@ npm run build -- --base=/good-bad-ugly/
 
 `npm run news:generate` writes a validated eligible draft to `src/data/today.json`, plus the compact editorial record and recent-article ledger. It does not overwrite an edition whose date is today or later. Local generation alone does not deploy anything.
 
+## Collection status
+
+Each completed write attempt also writes `public/collection-status.json`. The versioned public report records the finish time, attempted Chicago edition date, eligible Good/Bad/Ugly counts, candidate counts by source, and aggregate exclusion counts: recently used articles, unavailable requests/feeds, unsuitable material, insufficient supporting evidence, bounded request limits, and feeds without recent usable entries. Raw errors, article URLs and excerpt text stay out of this report. Exclusion counts count events, not unique articles; a feed failure is an event too.
+
+An `already-current` result means the collector deliberately did not fetch sources; candidate and category counts are unknown (`null`), rather than zero. A `prepared` outcome means local content was generated, not that Pages deployed it. A `skipped` outcome keeps the edition, extraction audit and recent-article ledger untouched. There is no sample report committed before a real collection attempt.
+
+The publishing workflow commits the status report even when a shortage prevents a new edition, after verifying the three publishing files stayed unchanged and the remote branch still matches the starting commit. The ordinary build/deploy path then publishes the updated diagnostics alongside the retained edition. Dry runs do not write or commit the report. Exceptions still fail the workflow; a report from an earlier run must not be read as the latest run succeeding. The administrator view also checks public GitHub Actions state so failures before a new report can deploy remain visible. GitHub run IDs and attempt numbers are recorded only when valid; locally generated reports have no workflow identity.
+
 ## Initial setup
 
 The repository must remain public to use free standard GitHub-hosted runner compute. Use only the standard Ubuntu runner and included Pages service; no paid API, large runner, optional cache, or paid fallback is configured. Pages deployment artifacts have one-day retention. Free-tier limits and terms still apply; no upgrade is performed automatically.

@@ -113,6 +113,7 @@ jobs:
           npm run lint
           npm run build -- --base=/good-bad-ugly/
           cmp src/data/today.json dist/edition.json
+          cmp public/collection-status.json dist/collection-status.json
           git diff --check
       - name: Publish only if the owner has not changed the branch
         id: publish
@@ -132,14 +133,25 @@ jobs:
               echo 'Collector reported publication without a content change.' >&2
               exit 1
             fi
-            git config user.name 'github-actions[bot]'
-            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git commit -m 'Publish automatically prepared daily edition'
-            # A concurrent owner push rejects this non-forced push; never rebase over it.
-            git push origin HEAD:main
+            message='Publish automatically prepared daily edition'
           elif [[ -n "$(git status --porcelain -- src/data/today.json scripts/data/editorial-record.json scripts/data/recent-articles.json)" ]]; then
             echo 'A skipped collection unexpectedly changed publishing files.' >&2
             exit 1
+          elif [[ "$DRAFT_STATUS" == 'skipped' ]]; then
+            message='Record daily collection without replacing the edition'
+          else
+            echo 'Only a published or skipped collection can be committed.' >&2
+            exit 1
+          fi
+          # Even a shortage records when sources were checked and why content was kept.
+          # This file reports preparation, never successful deployment.
+          git add -- public/collection-status.json
+          if ! git diff --cached --quiet; then
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git commit -m "$message"
+            # A concurrent owner push rejects this non-forced push; never rebase over it.
+            git push origin HEAD:main
           fi
           echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
