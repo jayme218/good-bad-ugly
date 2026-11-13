@@ -1,23 +1,23 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-13T12:47:15.968999Z",
+  "checkedAt": "2026-11-13T20:28:24.839943Z",
   "editionDate": "2026-11-13",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
-    "good": 2,
+    "good": 1,
     "bad": 0,
-    "ugly": 3
+    "ugly": 5
   },
   "sources": [
     {
       "id": "nasa",
       "name": "NASA",
-      "candidates": 2,
+      "candidates": 1,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 28,
+        "unsuitable": 29,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -30,10 +30,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 2,
+        "unsuitable": 1,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 3
+        "noRecentEntries": 4
       }
     },
     {
@@ -43,7 +43,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 3,
+        "unsuitable": 4,
         "insufficientEvidence": 1,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -78,11 +78,11 @@
     {
       "id": "doj",
       "name": "U.S. Department of Justice",
-      "candidates": 3,
+      "candidates": 5,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 21,
+        "unsuitable": 19,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "43428016081",
+    "runId": "43501828143",
     "runAttempt": 1
   }
 }
