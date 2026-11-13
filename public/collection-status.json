@@ -1,0 +1,109 @@
+{
+  "version": 1,
+  "checkedAt": "2026-11-13T12:47:15.968999Z",
+  "editionDate": "2026-11-13",
+  "outcome": "skipped",
+  "reason": "insufficient-stories",
+  "eligible": {
+    "good": 2,
+    "bad": 0,
+    "ugly": 3
+  },
+  "sources": [
+    {
+      "id": "nasa",
+      "name": "NASA",
+      "candidates": 2,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 28,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 0
+      }
+    },
+    {
+      "id": "bls",
+      "name": "U.S. Bureau of Labor Statistics",
+      "candidates": 0,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 2,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 3
+      }
+    },
+    {
+      "id": "ftc",
+      "name": "Federal Trade Commission",
+      "candidates": 0,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 3,
+        "insufficientEvidence": 1,
+        "requestLimit": 0,
+        "noRecentEntries": 0
+      }
+    },
+    {
+      "id": "nsf",
+      "name": "U.S. National Science Foundation",
+      "candidates": 0,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 0,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 1
+      }
+    },
+    {
+      "id": "bea",
+      "name": "U.S. Bureau of Economic Analysis",
+      "candidates": 0,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 0,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 1
+      }
+    },
+    {
+      "id": "doj",
+      "name": "U.S. Department of Justice",
+      "candidates": 3,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 21,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 0
+      }
+    },
+    {
+      "id": "fda",
+      "name": "U.S. Food and Drug Administration",
+      "candidates": 0,
+      "exclusions": {
+        "duplicate": 0,
+        "unavailable": 0,
+        "unsuitable": 1,
+        "insufficientEvidence": 0,
+        "requestLimit": 0,
+        "noRecentEntries": 0
+      }
+    }
+  ],
+  "workflow": {
+    "runId": "43428016081",
+    "runAttempt": 1
+  }
+}
