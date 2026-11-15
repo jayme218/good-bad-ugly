@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-14T18:43:36.325610Z",
-  "editionDate": "2026-11-14",
+  "checkedAt": "2026-11-15T19:21:34.739181Z",
+  "editionDate": "2026-11-15",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "43628176735",
+    "runId": "43751949288",
     "runAttempt": 1
   }
 }
