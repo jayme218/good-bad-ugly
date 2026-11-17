@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-16T22:52:40.263911Z",
-  "editionDate": "2026-11-16",
+  "checkedAt": "2026-11-17T21:44:44.440472Z",
+  "editionDate": "2026-11-17",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
-    "good": 0,
+    "good": 1,
     "bad": 0,
-    "ugly": 5
+    "ugly": 4
   },
   "sources": [
     {
@@ -17,7 +17,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 29,
+        "unsuitable": 30,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -30,10 +30,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 1,
+        "unsuitable": 0,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 4
+        "noRecentEntries": 5
       }
     },
     {
@@ -43,8 +43,8 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 2,
-        "insufficientEvidence": 1,
+        "unsuitable": 3,
+        "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
       }
@@ -78,11 +78,11 @@
     {
       "id": "doj",
       "name": "U.S. Department of Justice",
-      "candidates": 5,
+      "candidates": 4,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 18,
+        "unsuitable": 16,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -91,19 +91,19 @@
     {
       "id": "fda",
       "name": "U.S. Food and Drug Administration",
-      "candidates": 0,
+      "candidates": 1,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
         "unsuitable": 0,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 1
+        "noRecentEntries": 0
       }
     }
   ],
   "workflow": {
-    "runId": "43974110891",
+    "runId": "44182952524",
     "runAttempt": 1
   }
 }
