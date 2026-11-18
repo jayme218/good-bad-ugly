@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-17T21:44:44.440472Z",
-  "editionDate": "2026-11-17",
+  "checkedAt": "2026-11-18T21:24:25.899998Z",
+  "editionDate": "2026-11-18",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
-    "good": 1,
+    "good": 2,
     "bad": 0,
     "ugly": 4
   },
@@ -16,8 +16,8 @@
       "candidates": 0,
       "exclusions": {
         "duplicate": 0,
-        "unavailable": 0,
-        "unsuitable": 30,
+        "unavailable": 1,
+        "unsuitable": 20,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -30,10 +30,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 0,
+        "unsuitable": 1,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 5
+        "noRecentEntries": 4
       }
     },
     {
@@ -69,10 +69,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 0,
+        "unsuitable": 1,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 1
+        "noRecentEntries": 0
       }
     },
     {
@@ -82,7 +82,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 16,
+        "unsuitable": 19,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -91,11 +91,11 @@
     {
       "id": "fda",
       "name": "U.S. Food and Drug Administration",
-      "candidates": 1,
+      "candidates": 2,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 0,
+        "unsuitable": 1,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "44182952524",
+    "runId": "44401084048",
     "runAttempt": 1
   }
 }
