@@ -1,23 +1,23 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-18T21:24:25.899998Z",
-  "editionDate": "2026-11-18",
+  "checkedAt": "2026-11-19T21:28:38.405122Z",
+  "editionDate": "2026-11-19",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
-    "good": 2,
+    "good": 3,
     "bad": 0,
-    "ugly": 4
+    "ugly": 5
   },
   "sources": [
     {
       "id": "nasa",
       "name": "NASA",
-      "candidates": 0,
+      "candidates": 1,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 1,
-        "unsuitable": 20,
+        "unsuitable": 19,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -43,7 +43,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 3,
+        "unsuitable": 2,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -78,7 +78,7 @@
     {
       "id": "doj",
       "name": "U.S. Department of Justice",
-      "candidates": 4,
+      "candidates": 5,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "44401084048",
+    "runId": "44619088316",
     "runAttempt": 1
   }
 }
