@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-19T21:28:38.405122Z",
-  "editionDate": "2026-11-19",
+  "checkedAt": "2026-11-20T21:03:37.229232Z",
+  "editionDate": "2026-11-20",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
@@ -30,10 +30,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 1,
+        "unsuitable": 2,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 4
+        "noRecentEntries": 3
       }
     },
     {
@@ -69,7 +69,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 1,
+        "unsuitable": 2,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "44619088316",
+    "runId": "44816868043",
     "runAttempt": 1
   }
 }
