@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-21T20:04:23.715127Z",
-  "editionDate": "2026-11-21",
+  "checkedAt": "2026-11-22T20:19:36.894558Z",
+  "editionDate": "2026-11-22",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
     "good": 3,
     "bad": 0,
-    "ugly": 5
+    "ugly": 4
   },
   "sources": [
     {
@@ -78,11 +78,11 @@
     {
       "id": "doj",
       "name": "U.S. Department of Justice",
-      "candidates": 5,
+      "candidates": 4,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 19,
+        "unsuitable": 20,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "44944276119",
+    "runId": "45065760896",
     "runAttempt": 1
   }
 }
