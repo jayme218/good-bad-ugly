@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-22T20:19:36.894558Z",
-  "editionDate": "2026-11-22",
+  "checkedAt": "2026-11-24T00:48:55.682737Z",
+  "editionDate": "2026-11-23",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
-    "good": 3,
+    "good": 5,
     "bad": 0,
-    "ugly": 4
+    "ugly": 5
   },
   "sources": [
     {
@@ -16,8 +16,8 @@
       "candidates": 1,
       "exclusions": {
         "duplicate": 0,
-        "unavailable": 1,
-        "unsuitable": 19,
+        "unavailable": 2,
+        "unsuitable": 9,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -56,10 +56,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 0,
+        "unsuitable": 2,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 1
+        "noRecentEntries": 0
       }
     },
     {
@@ -78,11 +78,11 @@
     {
       "id": "doj",
       "name": "U.S. Department of Justice",
-      "candidates": 4,
+      "candidates": 5,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 20,
+        "unsuitable": 18,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -91,7 +91,7 @@
     {
       "id": "fda",
       "name": "U.S. Food and Drug Administration",
-      "candidates": 2,
+      "candidates": 4,
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "45065760896",
+    "runId": "45300153368",
     "runAttempt": 1
   }
 }
