@@ -1,52 +1,52 @@
 {
-  "date": "2026-11-02",
+  "date": "2026-11-25",
   "timezone": "America/Chicago",
   "revision": 0,
   "reviewStatus": "automated",
   "items": [
     {
       "type": "good",
-      "headline": "FDA Approves First Plasmid…",
+      "headline": "FDA Approves First Treatment…",
       "summaries": [
-        "U.S. Food and Drug Administration reports: The U.S. Food and Drug Administration today granted accelerated approval for Voceryq (doruxapapogene ralaplasmid and lalikinogene sifuplasmid-gxfd) for treatment of adults with recurrent respiratory papillomatosis (RRP), a rare disease caused by human papillomavirus (HPV) that leads to the formation of small, wart-like growths in the patient’s airways.",
-        "U.S. Food and Drug Administration reports: This approval, the first for a plasmid DNA-based immunotherapy in the U.S., offers patients a new therapeutic option that targets the root cause of RRP and has been shown to reduce the burden of surgical intervention, representing an important step forward for a patient population with limited treatment options.",
-        "U.S. Food and Drug Administration reports: The agency based this accelerated approval on clinical trial data showing Voceryq helps reduce the frequency of surgical procedures required to remove growths in adult patients with RRP — an intermediate clinical endpoint reasonably likely to predict clinical benefit."
+        "U.S. Food and Drug Administration reports: The U.S. Food and Drug Administration today approved Welgemda (ribitol), the first medicine for treating limb-girdle muscular dystrophy type 2I/R9 (LGMD2I/R9), a rare inherited muscle disease, for adults and pediatric patients weighing at least 30 kg.",
+        "U.S. Food and Drug Administration reports: Welgemda is the first therapy approved for any form of limb-girdle muscular dystrophy.",
+        "U.S. Food and Drug Administration reports: LGMD2I/R9 is caused by mutations in the FKRP gene, which disrupt a key biological process in muscle cells."
       ],
       "editorNote": "Automatically selected and excerpted from U.S. Food and Drug Administration. Category assignment is editorial; this draft has not been independently fact-checked.",
       "source": {
         "name": "U.S. Food and Drug Administration",
-        "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-plasmid-dna-based-immunotherapy-adults-recurrent-respiratory-papillomatosis",
-        "publishedAt": "2026-10-30"
+        "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-treatment-limb-girdle-muscular-dystrophy-type-2ir9",
+        "publishedAt": "2026-11-23"
       }
     },
     {
       "type": "bad",
       "headline": "PCE price increases reported",
       "summaries": [
-        "U.S. Bureau of Economic Analysis reports: Personal income increased $54.5 billion (0.2 percent at a monthly rate) in September, according to estimates released today by the U.S. Bureau of Economic Analysis (BEA).",
-        "U.S. Bureau of Economic Analysis reports: Disposable personal income (DPI)—personal income less personal current taxes—increased $52.7 billion (0.2 percent), and personal consumption expenditures (PCE) increased $113.1 billion (0.5 percent).",
-        "U.S. Bureau of Economic Analysis reports: From the preceding month, the PCE price index for September increased 0.5 percent."
+        "U.S. Bureau of Economic Analysis reports: Personal income increased $201.8 billion (0.7 percent at a monthly rate) in October, according to estimates released today by the U.S. Bureau of Economic Analysis (BEA).",
+        "U.S. Bureau of Economic Analysis reports: Disposable personal income (DPI)—personal income less personal current taxes—increased $200.5 billion (0.8 percent), and personal consumption expenditures (PCE) increased $63.8 billion (0.3 percent).",
+        "U.S. Bureau of Economic Analysis reports: From the preceding month, the PCE price index for October increased 0.3 percent."
       ],
       "editorNote": "Automatically selected and excerpted from U.S. Bureau of Economic Analysis. Category assignment is editorial; this draft has not been independently fact-checked.",
       "source": {
         "name": "U.S. Bureau of Economic Analysis",
-        "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-september-2026",
-        "publishedAt": "2026-10-29"
+        "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-october-2026",
+        "publishedAt": "2026-11-25"
       }
     },
     {
       "type": "ugly",
-      "headline": "FTC, Washington Take Action…",
+      "headline": "SHEIN to Pay $100 Million…",
       "summaries": [
-        "Federal Trade Commission reports: Small businesses also will be able to rescind processing agreements without a termination penalty under the proposed order settling the FTC and Washington’s allegations.",
-        "Federal Trade Commission reports: The FTC and Washington allege that Riverside’s sales pitches included a quote sheet that compared the costs prospective clients paid their existing payment processor with the amount they would save if they used Riverside’s services instead.",
-        "Federal Trade Commission reports: The FTC alleges that Riverside’s practices violated the FTC Act and the Gramm-Leach-Bliley Act by obtaining consumers’ financial information by using false or fraudulent statements."
+        "Federal Trade Commission reports: SHEIN will pay $100 million in consumer redress to settle Federal Trade Commission allegations that the fast-fashion retailer made it unreasonably difficult for consumers to resolve purchase issues, failed to keep its shipping promises, suppressed negative reviews and made deceptive supply chain and cotton-origin claims, all in violation of the law.",
+        "Federal Trade Commission reports: In a complaint, the FTC alleges that, through its practices, SHEIN violated Section 5 of the FTC Act, the Mail, Internet, or Telephone Order Merchandise Rule, and the Rule on the Use of Consumer Reviews and Testimonials.",
+        "Federal Trade Commission reports: The complaint alleges that SHEIN marketed fast, transparent and reliable shipping but tens of thousands of consumers reported that their orders arrived days, weeks or months late, while some consumers never received their orders at all."
       ],
       "editorNote": "Automatically selected and excerpted from Federal Trade Commission. Category assignment is editorial; this draft has not been independently fact-checked.",
       "source": {
         "name": "Federal Trade Commission",
-        "url": "https://www.ftc.gov/news-events/news/press-releases/2026/11/ftc-washington-take-action-against-payment-processor-deceiving-small-businesses-about-costs",
-        "publishedAt": "2026-11-02"
+        "url": "https://www.ftc.gov/news-events/news/press-releases/2026/11/shein-pay-100-million-over-allegations-deceptive-unfair-practices",
+        "publishedAt": "2026-11-24"
       }
     }
   ]

@@ -1,45 +1,45 @@
 {
-  "editionDate": "2026-11-02",
+  "editionDate": "2026-11-25",
   "revision": 0,
-  "checkedAt": "2026-11-03T03:34:52.023349+00:00",
+  "checkedAt": "2026-11-25T22:28:40.029795+00:00",
   "stories": [
     {
       "type": "good",
       "source": "U.S. Food and Drug Administration",
-      "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-plasmid-dna-based-immunotherapy-adults-recurrent-respiratory-papillomatosis",
-      "sourceTitle": "FDA Approves First Plasmid DNA-based Immunotherapy for Adults with Recurrent Respiratory Papillomatosis",
-      "publishedAt": "2026-10-30T20:32:08+00:00",
-      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
+      "url": "https://www.fda.gov/news-events/press-announcements/fda-approves-first-treatment-limb-girdle-muscular-dystrophy-type-2ir9",
+      "sourceTitle": "FDA Approves First Treatment for Limb-Girdle Muscular Dystrophy Type 2I/R9",
+      "publishedAt": "2026-11-23T18:25:08+00:00",
+      "checkedAt": "2026-11-25T22:28:40.029795+00:00",
       "supportingPassages": [
-        "The U.S. Food and Drug Administration today granted accelerated approval for Voceryq (doruxapapogene ralaplasmid and lalikinogene sifuplasmid-gxfd) for treatment of adults with recurrent respiratory papillomatosis (RRP), a rare disease caused by human papillomavirus (HPV) that leads to the formation of small, wart-like growths in the patient’s airways.",
-        "This approval, the first for a plasmid DNA-based immunotherapy in the U.S., offers patients a new therapeutic option that targets the root cause of RRP and has been shown to reduce the burden of surgical intervention, representing an important step forward for a patient population with limited treatment options.",
-        "The agency based this accelerated approval on clinical trial data showing Voceryq helps reduce the frequency of surgical procedures required to remove growths in adult patients with RRP — an intermediate clinical endpoint reasonably likely to predict clinical benefit."
+        "The U.S. Food and Drug Administration today approved Welgemda (ribitol), the first medicine for treating limb-girdle muscular dystrophy type 2I/R9 (LGMD2I/R9), a rare inherited muscle disease, for adults and pediatric patients weighing at least 30 kg.",
+        "Welgemda is the first therapy approved for any form of limb-girdle muscular dystrophy.",
+        "LGMD2I/R9 is caused by mutations in the FKRP gene, which disrupt a key biological process in muscle cells."
       ]
     },
     {
       "type": "bad",
       "source": "U.S. Bureau of Economic Analysis",
-      "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-september-2026",
-      "sourceTitle": "Personal Income and Outlays, September 2026",
-      "publishedAt": "2026-10-29T12:30:00+00:00",
-      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
+      "url": "https://www.bea.gov/news/2026/personal-income-and-outlays-october-2026",
+      "sourceTitle": "Personal Income and Outlays, October 2026",
+      "publishedAt": "2026-11-25T13:30:00+00:00",
+      "checkedAt": "2026-11-25T22:28:40.029795+00:00",
       "supportingPassages": [
-        "Personal income increased $54.5 billion (0.2 percent at a monthly rate) in September, according to estimates released today by the U.S. Bureau of Economic Analysis (BEA).",
-        "Disposable personal income (DPI)—personal income less personal current taxes—increased $52.7 billion (0.2 percent), and personal consumption expenditures (PCE) increased $113.1 billion (0.5 percent).",
-        "From the preceding month, the PCE price index for September increased 0.5 percent."
+        "Personal income increased $201.8 billion (0.7 percent at a monthly rate) in October, according to estimates released today by the U.S. Bureau of Economic Analysis (BEA).",
+        "Disposable personal income (DPI)—personal income less personal current taxes—increased $200.5 billion (0.8 percent), and personal consumption expenditures (PCE) increased $63.8 billion (0.3 percent).",
+        "From the preceding month, the PCE price index for October increased 0.3 percent."
       ]
     },
     {
       "type": "ugly",
       "source": "Federal Trade Commission",
-      "url": "https://www.ftc.gov/news-events/news/press-releases/2026/11/ftc-washington-take-action-against-payment-processor-deceiving-small-businesses-about-costs",
-      "sourceTitle": "FTC, Washington Take Action Against Payment Processor for Deceiving Small Businesses About Costs and Cancellation Terms",
-      "publishedAt": "2026-11-02T12:00:00+00:00",
-      "checkedAt": "2026-11-03T03:34:52.023349+00:00",
+      "url": "https://www.ftc.gov/news-events/news/press-releases/2026/11/shein-pay-100-million-over-allegations-deceptive-unfair-practices",
+      "sourceTitle": "SHEIN to Pay $100 Million Over Allegations of Deceptive and Unfair Practices",
+      "publishedAt": "2026-11-24T12:00:00+00:00",
+      "checkedAt": "2026-11-25T22:28:40.029795+00:00",
       "supportingPassages": [
-        "Small businesses also will be able to rescind processing agreements without a termination penalty under the proposed order settling the FTC and Washington’s allegations.",
-        "The FTC and Washington allege that Riverside’s sales pitches included a quote sheet that compared the costs prospective clients paid their existing payment processor with the amount they would save if they used Riverside’s services instead.",
-        "The FTC alleges that Riverside’s practices violated the FTC Act and the Gramm-Leach-Bliley Act by obtaining consumers’ financial information by using false or fraudulent statements."
+        "SHEIN will pay $100 million in consumer redress to settle Federal Trade Commission allegations that the fast-fashion retailer made it unreasonably difficult for consumers to resolve purchase issues, failed to keep its shipping promises, suppressed negative reviews and made deceptive supply chain and cotton-origin claims, all in violation of the law.",
+        "In a complaint, the FTC alleges that, through its practices, SHEIN violated Section 5 of the FTC Act, the Mail, Internet, or Telephone Order Merchandise Rule, and the Rule on the Use of Consumer Reviews and Testimonials.",
+        "The complaint alleges that SHEIN marketed fast, transparent and reliable shipping but tens of thousands of consumers reported that their orders arrived days, weeks or months late, while some consumers never received their orders at all."
       ]
     }
   ]
