@@ -1,13 +1,13 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-25T22:28:46.626813Z",
-  "editionDate": "2026-11-25",
-  "outcome": "prepared",
-  "reason": "ready",
+  "checkedAt": "2026-11-26T22:18:32.755269Z",
+  "editionDate": "2026-11-26",
+  "outcome": "skipped",
+  "reason": "insufficient-stories",
   "eligible": {
-    "good": 2,
-    "bad": 1,
-    "ugly": 7
+    "good": 1,
+    "bad": 0,
+    "ugly": 6
   },
   "sources": [
     {
@@ -39,9 +39,9 @@
     {
       "id": "ftc",
       "name": "Federal Trade Commission",
-      "candidates": 1,
+      "candidates": 0,
       "exclusions": {
-        "duplicate": 0,
+        "duplicate": 1,
         "unavailable": 0,
         "unsuitable": 3,
         "insufficientEvidence": 0,
@@ -65,9 +65,9 @@
     {
       "id": "bea",
       "name": "U.S. Bureau of Economic Analysis",
-      "candidates": 1,
+      "candidates": 0,
       "exclusions": {
-        "duplicate": 0,
+        "duplicate": 1,
         "unavailable": 0,
         "unsuitable": 2,
         "insufficientEvidence": 0,
@@ -91,9 +91,9 @@
     {
       "id": "fda",
       "name": "U.S. Food and Drug Administration",
-      "candidates": 2,
+      "candidates": 1,
       "exclusions": {
-        "duplicate": 0,
+        "duplicate": 1,
         "unavailable": 0,
         "unsuitable": 0,
         "insufficientEvidence": 0,
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "45713520722",
+    "runId": "45903909846",
     "runAttempt": 1
   }
 }
