@@ -1,7 +1,7 @@
 {
   "version": 1,
-  "checkedAt": "2026-11-26T22:18:32.755269Z",
-  "editionDate": "2026-11-26",
+  "checkedAt": "2026-11-27T21:56:39.304181Z",
+  "editionDate": "2026-11-27",
   "outcome": "skipped",
   "reason": "insufficient-stories",
   "eligible": {
@@ -30,10 +30,10 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 1,
+        "unsuitable": 0,
         "insufficientEvidence": 0,
         "requestLimit": 0,
-        "noRecentEntries": 4
+        "noRecentEntries": 5
       }
     },
     {
@@ -43,7 +43,7 @@
       "exclusions": {
         "duplicate": 1,
         "unavailable": 0,
-        "unsuitable": 3,
+        "unsuitable": 2,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -69,7 +69,7 @@
       "exclusions": {
         "duplicate": 1,
         "unavailable": 0,
-        "unsuitable": 2,
+        "unsuitable": 1,
         "insufficientEvidence": 0,
         "requestLimit": 0,
         "noRecentEntries": 0
@@ -82,7 +82,7 @@
       "exclusions": {
         "duplicate": 0,
         "unavailable": 0,
-        "unsuitable": 16,
+        "unsuitable": 14,
         "insufficientEvidence": 0,
         "requestLimit": 1,
         "noRecentEntries": 0
@@ -103,7 +103,7 @@
     }
   ],
   "workflow": {
-    "runId": "45903909846",
+    "runId": "46073488491",
     "runAttempt": 1
   }
 }
